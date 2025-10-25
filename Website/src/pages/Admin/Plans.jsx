@@ -8,11 +8,11 @@ export default function PlansPage() {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [showEditForm, setShowEditForm] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
-
   const [showAddModal, setShowAddModal] = useState(false);
+  const [message, setMessage] = useState(null);
+
   const [newPlan, setNewPlan] = useState({
     planName: "",
     description: "",
@@ -22,20 +22,21 @@ export default function PlansPage() {
     chargerType: "Type 2",
   });
 
-  const [message, setMessage] = useState(null);
-
-  // ✅ Fetch all plans (frontend only fix)
+  // ✅ Fetch all plans
   useEffect(() => {
     const token = localStorage.getItem("token");
 
     fetch("http://localhost:8080/api/plans/all", {
-      method: "GET", // explicitly use GET
+      method: "GET",
       headers: {
-        Authorization: `Bearer ${token}`, // no Content-Type needed
+        Authorization: `Bearer ${token}`,
       },
     })
-      .then((res) => {
-        if (!res.ok) throw new Error(`Failed to fetch plans: ${res.status}`);
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`Failed to fetch plans: ${res.status} - ${text}`);
+        }
         return res.json();
       })
       .then((data) => {
@@ -49,6 +50,7 @@ export default function PlansPage() {
       });
   }, []);
 
+  // ✅ Delete Plan
   const handleDelete = async (id) => {
     const token = localStorage.getItem("token");
     if (!window.confirm("Are you sure you want to delete this plan?")) return;
@@ -59,8 +61,8 @@ export default function PlansPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to delete plan");
+      const data = await res.text();
+      if (!res.ok) throw new Error(data || "Failed to delete plan");
 
       setPlans((prev) => prev.filter((plan) => plan.id !== id));
       setMessage("✅ Plan deleted successfully");
@@ -69,6 +71,7 @@ export default function PlansPage() {
     }
   };
 
+  // ✅ Edit Plan
   const handleEdit = (plan) => {
     setSelectedPlan(plan);
     setShowEditForm(true);
@@ -88,6 +91,7 @@ export default function PlansPage() {
     handleCloseForm();
   };
 
+  // ✅ Add Plan
   const handleAddPlan = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
@@ -102,10 +106,11 @@ export default function PlansPage() {
         body: JSON.stringify(newPlan),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to add plan");
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || "Failed to add plan");
 
-      setPlans((prev) => [...prev, data.plan || data]); // support your backend response
+      // Backend returns text, not JSON, so refetch all
+      await refreshPlans();
       setMessage("✅ New plan added successfully");
       setShowAddModal(false);
       setNewPlan({
@@ -121,13 +126,30 @@ export default function PlansPage() {
     }
   };
 
+  const refreshPlans = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch("http://localhost:8080/api/plans/all", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPlans(data);
+      }
+    } catch {
+      // ignore
+    }
+  };
+
   if (loading) return <p>Loading plans...</p>;
   if (error) return <p style={{ color: "red" }}>Error: {error}</p>;
 
   return (
     <div style={{ padding: "20px" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2 style={{ fontSize: "32px", fontWeight: "bold", marginBottom: "20px" }}>Charging Plans</h2>
+        <h2 style={{ fontSize: "32px", fontWeight: "bold", marginBottom: "20px" }}>
+          Charging Plans
+        </h2>
         <button
           onClick={() => setShowAddModal(true)}
           style={{
@@ -228,11 +250,19 @@ export default function PlansPage() {
             />
 
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <label style={{ fontSize: 12, marginBottom: 4, color: "#666" }}>Charger Type</label>
+              <label style={{ fontSize: 12, marginBottom: 4, color: "#666" }}>
+                Charger Type
+              </label>
               <select
                 value={newPlan.chargerType}
                 onChange={(e) => setNewPlan({ ...newPlan, chargerType: e.target.value })}
-                style={{ height: 48, borderRadius: 8, border: "1px solid #ccc", padding: "0 12px", fontSize: 14 }}
+                style={{
+                  height: 48,
+                  borderRadius: 8,
+                  border: "1px solid #ccc",
+                  padding: "0 12px",
+                  fontSize: 14,
+                }}
               >
                 <option>Type 1</option>
                 <option>Type 2</option>
@@ -241,22 +271,40 @@ export default function PlansPage() {
               </select>
             </div>
 
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "10px" }}>
-              <button type="button" onClick={() => setShowAddModal(false)} style={{
-                padding: "10px 18px",
-                borderRadius: "6px",
-                border: "1px solid #ccc",
-                background: "#f5f5f5",
-                cursor: "pointer",
-              }}>Cancel</button>
-              <button type="submit" style={{
-                background: "#000",
-                color: "#fff",
-                border: "none",
-                borderRadius: "6px",
-                padding: "10px 20px",
-                cursor: "pointer",
-              }}>Save Plan</button>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "12px",
+                marginTop: "10px",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                style={{
+                  padding: "10px 18px",
+                  borderRadius: "6px",
+                  border: "1px solid #ccc",
+                  background: "#f5f5f5",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                style={{
+                  background: "#000",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "10px 20px",
+                  cursor: "pointer",
+                }}
+              >
+                Save Plan
+              </button>
             </div>
           </form>
         </div>
@@ -265,7 +313,7 @@ export default function PlansPage() {
   );
 }
 
-// Floating Input
+// ✅ Floating Input Component
 function FloatingInput({ label, value, onChange, type = "text" }) {
   const [focused, setFocused] = useState(false);
   return (
@@ -291,7 +339,13 @@ function FloatingInput({ label, value, onChange, type = "text" }) {
         onChange={onChange}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        style={{ width: "100%", height: 48, padding: "12px 16px", borderRadius: 8, border: "1px solid #ccc" }}
+        style={{
+          width: "100%",
+          height: 48,
+          padding: "12px 16px",
+          borderRadius: 8,
+          border: "1px solid #ccc",
+        }}
       />
     </div>
   );

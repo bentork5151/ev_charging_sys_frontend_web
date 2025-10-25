@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Topbar from "../../components/admin/topbar";
 import Sidebar from "../../components/admin/Sidebar";
@@ -18,86 +18,16 @@ import AdminStaff from "./AdminStaff";
 
 export default function Dashboard({ onLogout }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [stats, setStats] = useState([]);
   const [showLogout, setShowLogout] = useState(false);
   const navigate = useNavigate();
 
-  // Redirect to login if no token
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) navigate("/login", { replace: true });
-  }, [navigate]);
-
-  // Fetch dashboard stats
-  useEffect(() => {
-    const fetchDashboardStats = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          console.warn("No token found, redirecting to login.");
-          navigate("/login", { replace: true });
-          return;
-        }
-
-        const headers = { Authorization: `Bearer ${token}` };
-
-        // Total users
-        const usersRes = await fetch("http://localhost:8080/api/users/total", { headers });
-        const totalUsers = await usersRes.json();
-
-        // Total sessions
-        const sessionsRes = await fetch("http://localhost:8080/api/sessions/total", { headers });
-        const totalSessions = await sessionsRes.json();
-
-        // Total energy consumed
-        const energyRes = await fetch("http://localhost:8080/api/sessions/energy", { headers });
-        const totalEnergy = await energyRes.json();
-
-        // ✅ Fetch total revenue
-        let totalRevenue = 0;
-        try {
-          const revenueRes = await fetch("http://localhost:8080/api/revenue/total", { headers });
-
-          if (revenueRes.ok) {
-            const totalText = await revenueRes.json();
-            console.log("Revenue API response:", data);
-
-            // Backend may return a number or object
-            if (typeof data === "number") {
-              totalRevenue = data;
-            } else if (data.total != null) {
-              totalRevenue = Number(data.total);
-            } else {
-              console.warn("Unexpected revenue data format:", data);
-            }
-          } else {
-            console.warn("Revenue total endpoint returned", revenueRes.status);
-          }
-        } catch (err) {
-          console.error("Error fetching total revenue:", err);
-        }
-
-        // Set dashboard stats
-        setStats([
-          { title: "Total Users", value: totalUsers, icon: "👤" },
-          {
-            title: "Revenue",
-            value: `₹${totalRevenue.toLocaleString("en-IN", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}`,
-            icon: "💰",
-          },
-          { title: "Sessions", value: totalSessions, icon: "📊" },
-          { title: "Units Consumed", value: `${Number(totalEnergy).toFixed(2)} kWh`, icon: "⚡" },
-        ]);
-      } catch (err) {
-        console.error("Error fetching dashboard stats:", err);
-      }
-    };
-
-    fetchDashboardStats();
-  }, [navigate]);
+  // Static dashboard stats
+  const stats = [
+    { title: "Total Users", value: 1250, icon: "👤" },
+    { title: "Revenue", value: "₹2,45,000.00", icon: "💰" },
+    { title: "Sessions", value: 580, icon: "📊" },
+    { title: "Units Consumed", value: "1340.50 kWh", icon: "⚡" },
+  ];
 
   const menuItems = [
     { name: "Dashboard", path: "" },
@@ -161,7 +91,6 @@ export default function Dashboard({ onLogout }) {
             borderTopLeftRadius: "28px",
             background: "#F1F1F1",
             overflowY: "auto",
-            fontFamily: "'Lexend', sans-serif",
           }}
         >
           <Routes>
