@@ -1,7 +1,7 @@
 import React from "react";
 import iconImg from "../../assets/icons/dashboard_total_user.png"; // adjust path
 
-export default function Card({ title, value }) {
+export default function Card({ title, value , value1}) {
   return (
     <div
       style={{
@@ -32,6 +32,21 @@ export default function Card({ title, value }) {
 
       {/* Text Section */}
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          {/* Label */}
+        <p
+          style={{
+            margin: "5px",
+            paddingTop:"10px",
+            fontFamily: "Roboto, sans-serif",
+            fontWeight: 400,
+            fontSize: "12px",
+            lineHeight: "153%",
+            color: "#666",
+          }}
+        >
+          {title}
+        </p> 
+       
         {/* Number */}
         <h3
           style={{
@@ -45,19 +60,20 @@ export default function Card({ title, value }) {
           {value}
         </h3>
 
-        {/* Label */}
-        <p
+         <h2
           style={{
-            margin: "0",
+            paddingBottom:"5px",
             fontFamily: "Roboto, sans-serif",
             fontWeight: 400,
             fontSize: "12px",
             lineHeight: "153%",
-            color: "#666",
           }}
         >
-          {title}
-        </p>
+          {value1}
+        </h2>
+
+
+      
       </div>
     </div>
   );
