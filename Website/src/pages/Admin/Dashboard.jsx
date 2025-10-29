@@ -2,8 +2,13 @@ import React, { useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Topbar from "../../components/admin/topbar";
 import Sidebar from "../../components/admin/Sidebar";
-import Card from "../../components/card/card.jsx";
+
+// import Card from "../../components/card/card.jsx";
 import LogoutModal from "../../components/admin/LogoutModal";
+import totalIcon from "../../assets/icons/stafficon/blue.svg";
+import adminIcon from "../../assets/icons/stafficon/toatl.svg";
+import managerIcon from "../../assets/icons/stafficon/yellow.svg";
+import VectorIcon from "../../assets/icons/stafficon/Vector-3.svg";
 
 // Pages
 import Stations from "./Stations";
@@ -22,12 +27,12 @@ export default function Dashboard({ onLogout }) {
   const navigate = useNavigate();
 
   // Static dashboard stats
-  const stats = [
-    { title: "Total Users", value: 1250, icon: "👤" },
-    { title: "Revenue", value: "₹2,45,000.00", icon: "💰" },
-    { title: "Sessions", value: 580, icon: "📊" },
-    { title: "Units Consumed", value: "1340.50 kWh", icon: "⚡" },
-  ];
+ const cards = [
+     { title: "Total Users ", value: "13,530",value1: "+23 from last month", icon: VectorIcon },
+     { title: "Total Revenue ", value: "₹1,98,530",value1: "+23 from last month", icon: VectorIcon },
+     { title: "Sessions", value: "8,209",value1: "+23 from last month", icon: VectorIcon },
+     { title: "Units Consumed", value: "23.4kW",value1: "+23 from last month", icon: VectorIcon },
+   ];
 
   const menuItems = [
     { name: "Dashboard", path: "" },
@@ -106,9 +111,78 @@ export default function Dashboard({ onLogout }) {
                       gap: "20px",
                     }}
                   >
-                    {stats.map((stat, i) => (
+                    {/* {stats.map((stat, i) => (
                       <Card key={i} {...stat} />
-                    ))}
+                    ))} */}
+
+
+ {/* cards css  */}
+                    <>
+      <style>
+        {`
+          .cards-container {
+            width: 100%;
+            display: flex;
+            justify-content: space-between; /* ✅ spread across full width */
+            gap: 15px;
+          }
+
+          .card-box {
+            flex: 1; /* ✅ each card grows equally */
+            max-width: 250px; /* prevent too wide */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 14px;
+            
+            padding: 18px 40px;
+            background-color: white;
+            border: 0.2px solid #ddd;
+            height: 90px;
+            font-family: Roboto, sans-serif;
+          }
+
+          .card-title {
+            font-size: 12px;
+            line-height: 160%;
+            font-weight: 400;
+          }
+
+          .card-value {
+            font-size: 24px;
+            line-height: 160%;
+            font-weight: 500;
+          }
+            .card-value1 {
+            font-size: 12px;
+            
+            font-weight: 400;
+          }
+
+          .card-icon {
+            width: 22px;
+            height: 22px;
+          }
+        `}
+      </style>
+
+      <div className="cards-container">
+        {cards.map((card, index) => (
+          <div className="card-box" key={index}>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span className="card-title">{card.title}</span>
+              <span className="card-value">{card.value}</span>
+               <span className="card-value1">{card.value1}</span>
+            </div>
+            <img
+              src={card.icon}
+              alt={`${card.title} icon`}
+              className="card-icon"
+            />
+          </div>
+        ))}
+      </div>
+    </>
                   </div>
                 </div>
               }
@@ -131,4 +205,5 @@ export default function Dashboard({ onLogout }) {
       )}
     </div>
   );
+  
 }
