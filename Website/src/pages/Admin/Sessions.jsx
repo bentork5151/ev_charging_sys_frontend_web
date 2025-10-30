@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+// import React, { useState, useEffect } from "react";
+import SessionPage from "./form/SessionPage";  // ✅ import fixed
+
 
 import totalIcon from "../../assets/icons/stationicon/Vector.svg";
 import activeIcon from "../../assets/icons/stationicon/green.svg";
@@ -8,9 +11,12 @@ import sortIcon from "../../assets/icons/stationicon/upndown.svg";
 import editIcon from "../../assets/icons/stationicon/edit.svg";
 import deleteIcon from "../../assets/icons/stationicon/delete.svg";
 
+
+
 function Sessions() {
   // State to store sessions
   const [sessions, setSessions] = useState([]);
+const [open, setOpen] = useState(false);
 
   useEffect(() => {
     // Load sessions from localStorage if exists
@@ -41,21 +47,23 @@ function Sessions() {
           Sessions
         </h2>
 
-        <button
-          style={{
-            width: "160px",
-            height: "45px",
-            borderRadius: "18px",
-            backgroundColor: "#000",
-            color: "#fff",
-            fontSize: "12px",
-            fontWeight: 500,
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          Customize
-        </button>
+       <button
+  style={{
+    width: "160px",
+    height: "45px",
+    borderRadius: "18px",
+    backgroundColor: "#000",
+    color: "#fff",
+    fontSize: "12px",
+    fontWeight: 500,
+    border: "none",
+    cursor: "pointer",
+  }}
+  onClick={() => setOpen(true)}
+>
+  Customize
+</button>
+<SessionPage open={open} setOpen={setOpen} />
       </div>
 
       {/* Summary Cards */}
@@ -257,6 +265,11 @@ function Sessions() {
           )}
         </div>
       </div>
+
+
+
+
+
     </div>
   );
 }

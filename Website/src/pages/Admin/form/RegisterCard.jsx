@@ -21,9 +21,25 @@ const RegisterCard = () => {
   };
 
   return (
+    <div
+      style={{
+        backgroundColor: "#fff",
+        borderRadius: "30px",
+        padding: "30px",
+        width: "400px",
+        maxWidth: "90%",
+        display: "flex",
+        flexDirection: "column",
+        
+        boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+      }}
+    >
     <div style={styles.container}>
       <h2 style={styles.title}>Register Card</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
+      <form  onSubmit={handleSubmit} style={styles.form}
+    
+      
+      >
         <label style={styles.label}>Name</label>
         <input
           type="text"
@@ -31,7 +47,9 @@ const RegisterCard = () => {
           placeholder="John Ace"
           value={formData.name}
           onChange={handleChange}
+        
           style={styles.input}
+          
         />
 
         <label style={styles.label}>Email</label>
@@ -77,6 +95,7 @@ const RegisterCard = () => {
           </button>
         </div>
       </form>
+    </div>
     </div>
   );
 };
