@@ -11,17 +11,26 @@ import editIcon from "../../assets/icons/stafficon/edit.svg";
 import deleteIcon from "../../assets/icons/stafficon/delete.png";
 import register from "./form/AddStaffForm"; 
 import StaffEditForm from "./form/staffedit"; // ✅ Import StaffEditForm
-import totalIcon from "../../assets/icons/stafficon/blue.svg";
-import adminIcon from "../../assets/icons/stafficon/toatl.svg";
-import managerIcon from "../../assets/icons/stafficon/yellow.svg";
-import activeIcon from "../../assets/icons/stafficon/red.svg";
+
+import VectorIcon from "../../assets/icons/stafficon/Vector-3.svg";
+
+
+
+
+
+
+
+
+
+
+
 const Maintenance = () => {
   const [isFormOpen, setIsFormOpen] = useState(null); // ✅ can be "add" or "edit"
 const cards = [
-    { title: "Active Cases", value: "123", icon: totalIcon },
-    { title: "Scheduled Today ", value: "1", icon: adminIcon },
-    { title: "In Progress", value: "1", icon: managerIcon },
-    { title: "Completed This Week", value: "3", icon: activeIcon },
+    { title: "Total Chargers", value: "123", value1: "+317 from last month", icon: VectorIcon },
+    { title: "Available Chargers ", value: "1", value1: "+23 from last month", icon: VectorIcon },
+    { title: "AC Chargers", value: "1",value1: "+23 from last month", icon: VectorIcon },
+    { title: "DC Chargers", value: "3",value1: "+23 from last month", icon: VectorIcon },
   ];
   // ✅ Staff Data in State (so we can delete/edit)
   const [staffData, setStaffData] = useState([
@@ -155,6 +164,7 @@ const cards = [
               fontSize: "15px",
               border: "none",
                paddingLeft: "50px",
+               backgroundColor:"#f2eeee6e",
               // cursor: "pointer",
             }}
             onClick={() => setIsFormOpen("add")}
@@ -215,6 +225,12 @@ const cards = [
             line-height: 160%;
             font-weight: 600;
           }
+            
+          .card-value1 {
+            font-size: 12px;
+            
+            font-weight: 400;
+          }
 
           .card-icon {
             width: 22px;
@@ -229,6 +245,7 @@ const cards = [
             <div style={{ display: "flex", flexDirection: "column" }}>
               <span className="card-title">{card.title}</span>
               <span className="card-value">{card.value}</span>
+              <span className="card-value1">{card.value1}</span>
             </div>
             <img
               src={card.icon}
