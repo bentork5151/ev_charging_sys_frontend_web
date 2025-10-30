@@ -6,7 +6,7 @@ import StaffSummaryCards from "../../components/card/StaffSummaryCards";
 import plusIcon from "../../assets/icons/stafficon/plus.svg";
 import editIcon from "../../assets/icons/stafficon/edit.svg";
 import deleteIcon from "../../assets/icons/stafficon/delete.png";
-import register from "./form/AddStaffForm"; 
+import AddStaffForm from "./form/RegisterCard"; 
 import StaffEditForm from "./form/staffedit"; // ✅ Import StaffEditForm
 import totalIcon from "../../assets/icons/stafficon/blue.svg";
 import adminIcon from "../../assets/icons/stafficon/toatl.svg";
@@ -101,7 +101,7 @@ const cards = [
             RFID Manager
           </h2>
 
-          {/* ✅ Add Staff Button */}
+          {/* ✅ Add RFID Button */}
           <button
             style={{
               width: "154px",
