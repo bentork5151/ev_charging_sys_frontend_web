@@ -1,271 +1,88 @@
-// export default function Maintenance() {
-//   return <h2>Maintenance & Emergency</h2>;
-// }
-// export default function Users() {
-//   return <h2>Users & RFID Cards</h2>;
-// }
 import React, { useState } from "react";
-import StaffSummaryCards from "../../components/card/StaffSummaryCards";
-import plusIcon from "../../assets/icons/stafficon/plus.svg";
-import editIcon from "../../assets/icons/stafficon/edit.svg";
-import deleteIcon from "../../assets/icons/stafficon/delete.png";
-import register from "./form/AddStaffForm"; 
-import StaffEditForm from "./form/staffedit"; // ✅ Import StaffEditForm
 
-import VectorIcon from "../../assets/icons/stafficon/Vector-3.svg";
+export default function AddCharger({ onClose }) {
+  const [formData, setFormData] = useState({
+    stationId: "",
+    ocppId: "",
+    connectorType: "",
+    chargerType: "",
+    rate: "",
+    chargeMode: "",
+  });
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-
-
-
-
-
-
-
-
-
-const Maintenance = () => {
-  const [isFormOpen, setIsFormOpen] = useState(null); // ✅ can be "add" or "edit"
-const cards = [
-    { title: "Total Chargers", value: "123", value1: "+317 from last month", icon: VectorIcon },
-    { title: "Available Chargers ", value: "1", value1: "+23 from last month", icon: VectorIcon },
-    { title: "AC Chargers", value: "1",value1: "+23 from last month", icon: VectorIcon },
-    { title: "DC Chargers", value: "3",value1: "+23 from last month", icon: VectorIcon },
-  ];
-  // ✅ Staff Data in State (so we can delete/edit)
-  const [staffData, setStaffData] = useState([
-    {
-      id: 1,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Admin",
-      roleColor: "#FECACA",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 2,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Employee",
-      roleColor: "#E5E7EB",
-      status: "Inactive",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 3,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Manager",
-      roleColor: "#BFDBFE",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 4,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Employee",
-      roleColor: "#E5E7EB",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-  ]);
-
-  // ✅ Delete function
-  const handleDelete = (id) => {
-    setStaffData((prev) => prev.filter((staff) => staff.id !== id));
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log("Form Data:", formData);
+    alert("Charger Added Successfully!");
+    onClose(); // ✅ Close the form after saving
   };
 
   return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        fontFamily: "Roboto, sans-serif",
-        background: "var(--Default-Background, #F1F1F1)",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "24px",
-        }}
-      >
-        {/* ✅ Header row */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            // justifyContent: "space-between",
-            marginBottom: "8px",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: "30px",
-              fontWeight: "bold",
-              fontFamily: "Lexend, sans-serif",
-              margin: 0,
-              paddingRight: "600px",
-              
-            }}
-          >
-            Charger Management
-          </h2>
-
-          {/* ✅ Add Staff Button */}
-          <button
-            style={{
-              // width: "154px",
-              height: "48px",
-              borderRadius: "18px",
-              // padding: "12px 18px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              // gap: "8px",
-              backgroundColor: "#1E1E1E", // Black
-              color: "#fff",
-              fontFamily: "Roboto, sans-serif",
-              fontWeight: 600,
-              fontSize: "12px",
-              border: "none",
-              cursor: "pointer",paddingRight: "12px",
-              
-            }}
-            onClick={() => setIsFormOpen("add")}
-          >
-            <img
-              src={plusIcon}
-              alt="Add"
-              style={{ width: "24px", height: "24px" }}
-            />
-            <span>  Add Charger</span>
-          </button>
-
-            
-             {/* ✅ Add Staff Button */}
-          <button
-            style={{
-              width: "154px",
-              height: "48px",
-              
-              // padding: "12px 18px",
-              // display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              // backgroundColor: "#1E1E1E", // Black
-              color: "#110202ff",
-              fontFamily: "Roboto, sans-serif",
-              fontWeight: 600,
-              fontSize: "15px",
-              border: "none",
-               paddingLeft: "50px",
-               backgroundColor:"#f2eeee6e",
-              // cursor: "pointer",
-            }}
-            onClick={() => setIsFormOpen("add")}
-          >
-            {/* <img
-              src={plusIcon}
-              alt="Add"
-              style={{ width: "24px", height: "24px" }}
-            /> */}
-            <span>Manage</span>
-          </button>
+    <div style={styles.container}>
+      <h2>Add Charger</h2>
+      <form style={styles.form} onSubmit={handleSubmit}>
+        <div style={styles.row}>
+          <div style={styles.inputGroup}>
+            <label>Station ID</label>
+            <input name="stationId" value={formData.stationId} onChange={handleChange} />
+          </div>
+          <div style={styles.inputGroup}>
+            <label>OCPP ID</label>
+            <input name="ocppId" value={formData.ocppId} onChange={handleChange} />
+          </div>
         </div>
 
-        <p
-          style={{
-            fontSize: "14px",
-            color: "#4B5563",
-            marginBottom: "32px",
-          }}
-        >
-          Manage charging stations and chargers across cities
-        </p>
-
-            {/* ✅ Cards Section */}
-<>
-      <style>
-        {`
-          .cards-container {
-            width: 100%;
-            display: flex;
-            justify-content: space-between; /* ✅ spread across full width */
-            gap: 15px;
-          }
-
-          .card-box {
-            flex: 1; /* ✅ each card grows equally */
-            max-width: 230px; /* prevent too wide */
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-radius: 14px;
-            
-            padding: 12px 20px;
-            background-color: white;
-            border: 0.2px solid #ddd;
-            height: 90px;
-            font-family: Roboto, sans-serif;
-          }
-
-          .card-title {
-            font-size: 12px;
-            line-height: 160%;
-            font-weight: 400;
-          }
-
-          .card-value {
-            font-size: 24px;
-            line-height: 160%;
-            font-weight: 600;
-          }
-            
-          .card-value1 {
-            font-size: 12px;
-            
-            font-weight: 400;
-          }
-
-          .card-icon {
-            width: 22px;
-            height: 22px;
-          }
-        `}
-      </style>
-
-      <div className="cards-container">
-        {cards.map((card, index) => (
-          <div className="card-box" key={index}>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span className="card-title">{card.title}</span>
-              <span className="card-value">{card.value}</span>
-              <span className="card-value1">{card.value1}</span>
-            </div>
-            <img
-              src={card.icon}
-              alt={`${card.title} icon`}
-              className="card-icon"
-            />
+        <div style={styles.row}>
+          <div style={styles.inputGroup}>
+            <label>Connector Type</label>
+            <input name="connectorType" value={formData.connectorType} onChange={handleChange} />
           </div>
-        ))}
-      </div>
-    </>
-    
+          <div style={styles.inputGroup}>
+            <label>Charger Type</label>
+            <input name="chargerType" value={formData.chargerType} onChange={handleChange} />
+          </div>
+        </div>
 
+        <div style={styles.row}>
+          <div style={styles.inputGroup}>
+            <label>Rate</label>
+            <input name="rate" value={formData.rate} onChange={handleChange} />
+          </div>
+          <div style={styles.inputGroup}>
+            <label>Charge Mode</label>
+            <input name="chargeMode" value={formData.chargeMode} onChange={handleChange} />
+          </div>
+        </div>
 
-        
-
-    
-      </div>
+        <div style={styles.buttonRow}>
+          <button type="button" style={styles.dismissBtn} onClick={onClose}>
+            Dismiss
+          </button>
+          <button type="submit" style={styles.saveBtn}>
+            Save
+          </button>
+        </div>
+      </form>
     </div>
   );
+}
+
+const styles = {
+  container: {
+    border: "1px dashed #999",
+    padding: "20px",
+    borderRadius: "10px",
+    maxWidth: "700px",
+    margin: "auto",
+  },
+  form: { display: "flex", flexDirection: "column", gap: "20px" },
+  row: { display: "flex", gap: "20px" },
+  inputGroup: { flex: 1, display: "flex", flexDirection: "column" },
+  buttonRow: { display: "flex", justifyContent: "flex-end", gap: "10px" },
+  dismissBtn: { backgroundColor: "transparent", border: "none", fontWeight: "bold", cursor: "pointer" },
+  saveBtn: { backgroundColor: "black", color: "white", border: "none", padding: "8px 20px", borderRadius: "20px", cursor: "pointer" },
 };
-
-export default Maintenance;
-
