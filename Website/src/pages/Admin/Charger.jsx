@@ -1,88 +1,107 @@
 import React, { useState } from "react";
+import StaffSummaryCards from "../../components/card/StaffSummaryCards";
+import plusIcon from "../../assets/icons/stafficon/plus.svg";
+import VectorIcon from "../../assets/icons/stafficon/Vector-3.svg";
+import AddCharger from "./form/AddCharger"; // ✅ Correct import (not SessionPage)
 
-export default function AddCharger({ onClose }) {
-  const [formData, setFormData] = useState({
-    stationId: "",
-    ocppId: "",
-    connectorType: "",
-    chargerType: "",
-    rate: "",
-    chargeMode: "",
-  });
+const Charger = () => {
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Form Data:", formData);
-    alert("Charger Added Successfully!");
-    onClose(); // ✅ Close the form after saving
-  };
+  const cards = [
+    { title: "Total Chargers", value: "123", value1: "+317 from last month", icon: VectorIcon },
+    { title: "Available Chargers", value: "1", value1: "+23 from last month", icon: VectorIcon },
+    { title: "AC Chargers", value: "1", value1: "+23 from last month", icon: VectorIcon },
+    { title: "DC Chargers", value: "3", value1: "+23 from last month", icon: VectorIcon },
+  ];
 
   return (
-    <div style={styles.container}>
-      <h2>Add Charger</h2>
-      <form style={styles.form} onSubmit={handleSubmit}>
-        <div style={styles.row}>
-          <div style={styles.inputGroup}>
-            <label>Station ID</label>
-            <input name="stationId" value={formData.stationId} onChange={handleChange} />
-          </div>
-          <div style={styles.inputGroup}>
-            <label>OCPP ID</label>
-            <input name="ocppId" value={formData.ocppId} onChange={handleChange} />
-          </div>
-        </div>
+    <div
+      style={{
+        width: "100%",
+        minHeight: "100vh",
+        fontFamily: "Roboto, sans-serif",
+        background: "#F1F1F1",
+      }}
+    >
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "24px" }}>
+        {/* Header row */}
+        <div style={{ display: "flex", alignItems: "center", marginBottom: "8px" }}>
+          <h2
+            style={{
+              fontSize: "30px",
+              fontWeight: "bold",
+              fontFamily: "Lexend, sans-serif",
+              margin: 0,
+              flexGrow: 1,
+            }}
+          >
+            Charger Management
+          </h2>
 
-        <div style={styles.row}>
-          <div style={styles.inputGroup}>
-            <label>Connector Type</label>
-            <input name="connectorType" value={formData.connectorType} onChange={handleChange} />
-          </div>
-          <div style={styles.inputGroup}>
-            <label>Charger Type</label>
-            <input name="chargerType" value={formData.chargerType} onChange={handleChange} />
-          </div>
-        </div>
-
-        <div style={styles.row}>
-          <div style={styles.inputGroup}>
-            <label>Rate</label>
-            <input name="rate" value={formData.rate} onChange={handleChange} />
-          </div>
-          <div style={styles.inputGroup}>
-            <label>Charge Mode</label>
-            <input name="chargeMode" value={formData.chargeMode} onChange={handleChange} />
-          </div>
-        </div>
-
-        <div style={styles.buttonRow}>
-          <button type="button" style={styles.dismissBtn} onClick={onClose}>
-            Dismiss
+          {/* Add Charger Button */}
+          <button
+            style={{
+              height: "48px",
+              borderRadius: "18px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#1E1E1E",
+              color: "#fff",
+              fontWeight: 600,
+              fontSize: "12px",
+              border: "none",
+              cursor: "pointer",
+              padding: "0 16px",
+            }}
+            onClick={() => setIsFormOpen(true)} // ✅ opens form
+          >
+            <img src={plusIcon} alt="Add" style={{ width: "24px", height: "24px", marginRight: "6px" }} />
+            Add Charger
           </button>
-          <button type="submit" style={styles.saveBtn}>
-            Save
-          </button>
         </div>
-      </form>
+
+        <p style={{ fontSize: "14px", color: "#4B5563", marginBottom: "32px" }}>
+          Manage charging stations and chargers across cities
+        </p>
+
+        {/* Cards Section */}
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "15px" }}>
+          {cards.map((card, index) => (
+            <div
+              key={index}
+              style={{
+                flex: 1,
+                maxWidth: "230px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                borderRadius: "14px",
+                padding: "12px 20px",
+                backgroundColor: "white",
+                border: "0.2px solid #ddd",
+                height: "90px",
+              }}
+            >
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ fontSize: "12px", fontWeight: 400 }}>{card.title}</span>
+                <span style={{ fontSize: "24px", fontWeight: 600 }}>{card.value}</span>
+                <span style={{ fontSize: "12px", fontWeight: 400 }}>{card.value1}</span>
+              </div>
+              <img src={card.icon} alt="icon" style={{ width: "22px", height: "22px" }} />
+            </div>
+          ))}
+        </div>
+
+        {/* ✅ Conditionally show AddCharger form */}
+        {isFormOpen && (
+          <div style={{ marginTop: "40px" }}>
+            <AddCharger onClose={() => setIsFormOpen(false)} />
+          </div>
+        )}
+      </div>
     </div>
   );
-}
-
-const styles = {
-  container: {
-    border: "1px dashed #999",
-    padding: "20px",
-    borderRadius: "10px",
-    maxWidth: "700px",
-    margin: "auto",
-  },
-  form: { display: "flex", flexDirection: "column", gap: "20px" },
-  row: { display: "flex", gap: "20px" },
-  inputGroup: { flex: 1, display: "flex", flexDirection: "column" },
-  buttonRow: { display: "flex", justifyContent: "flex-end", gap: "10px" },
-  dismissBtn: { backgroundColor: "transparent", border: "none", fontWeight: "bold", cursor: "pointer" },
-  saveBtn: { backgroundColor: "black", color: "white", border: "none", padding: "8px 20px", borderRadius: "20px", cursor: "pointer" },
 };
+
+export default Charger;
