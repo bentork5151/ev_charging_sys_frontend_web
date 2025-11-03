@@ -1,14 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import Topbar from "../../components/admin/topbar";
 import Sidebar from "../../components/admin/Sidebar";
-
-// import Card from "../../components/card/card.jsx";
+import OverviewChart from "../../components/admin/OverviewChart";
 import LogoutModal from "../../components/admin/LogoutModal";
-import totalIcon from "../../assets/icons/stafficon/blue.svg";
-import adminIcon from "../../assets/icons/stafficon/toatl.svg";
-import managerIcon from "../../assets/icons/stafficon/yellow.svg";
 import VectorIcon from "../../assets/icons/stafficon/Vector-3.svg";
+
 
 // Pages
 import Stations from "./Stations";
@@ -26,13 +23,12 @@ export default function Dashboard({ onLogout }) {
   const [showLogout, setShowLogout] = useState(false);
   const navigate = useNavigate();
 
-  // Static dashboard stats
- const cards = [
-     { title: "Total Users ", value: "13,530",value1: "+23 from last month", icon: VectorIcon },
-     { title: "Total Revenue ", value: "₹1,98,530",value1: "+23 from last month", icon: VectorIcon },
-     { title: "Sessions", value: "8,209",value1: "+23 from last month", icon: VectorIcon },
-     { title: "Units Consumed", value: "23.4kW",value1: "+23 from last month", icon: VectorIcon },
-   ];
+  const cards = [
+    { title: "Total Users", value: "13,530", value1: "+23 from last month", icon: VectorIcon },
+    { title: "Total Revenue", value: "₹1,98,530", value1: "+23 from last month", icon: VectorIcon },
+    { title: "Sessions", value: "8,209", value1: "+23 from last month", icon: VectorIcon },
+    { title: "Units Consumed", value: "23.4kW", value1: "+23 from last month", icon: VectorIcon },
+  ];
 
   const menuItems = [
     { name: "Dashboard", path: "" },
@@ -49,11 +45,8 @@ export default function Dashboard({ onLogout }) {
   ];
 
   const handleClick = (item) => {
-    if (item.name === "Log Out") {
-      setShowLogout(true);
-    } else if (item.path) {
-      navigate(item.path);
-    }
+    if (item.name === "Log Out") setShowLogout(true);
+    else if (item.path) navigate(item.path);
   };
 
   const handleLogout = () => {
@@ -104,86 +97,39 @@ export default function Dashboard({ onLogout }) {
               element={
                 <div>
                   <h1 className="text-2xl mb-4">Dashboard</h1>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                      gap: "20px",
-                    }}
-                  >
-                    {/* {stats.map((stat, i) => (
-                      <Card key={i} {...stat} />
-                    ))} */}
 
-
- {/* cards css  */}
-                    <>
-      <style>
-        {`
-          .cards-container {
-            width: 100%;
-            display: flex;
-            justify-content: space-between; /* ✅ spread across full width */
-            gap: 15px;
-          }
-
-          .card-box {
-            flex: 1; /* ✅ each card grows equally */
-            max-width: 250px; /* prevent too wide */
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-radius: 14px;
-            
-            padding: 18px 40px;
-            background-color: white;
-            border: 0.2px solid #ddd;
-            height: 90px;
-            font-family: Roboto, sans-serif;
-          }
-
-          .card-title {
-            font-size: 12px;
-            line-height: 160%;
-            font-weight: 400;
-          }
-
-          .card-value {
-            font-size: 24px;
-            line-height: 160%;
-            font-weight: 500;
-          }
-            .card-value1 {
-            font-size: 12px;
-            
-            font-weight: 400;
-          }
-
-          .card-icon {
-            width: 22px;
-            height: 22px;
-          }
-        `}
-      </style>
-
-      <div className="cards-container">
-        {cards.map((card, index) => (
-          <div className="card-box" key={index}>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span className="card-title">{card.title}</span>
-              <span className="card-value">{card.value}</span>
-               <span className="card-value1">{card.value1}</span>
-            </div>
-            <img
-              src={card.icon}
-              alt={`${card.title} icon`}
-              className="card-icon"
-            />
-          </div>
-        ))}
-      </div>
-    </>
+                  {/* Cards Section */}
+                  <div className="cards-container" style={{ display: "flex", gap: "15px" }}>
+                    {cards.map((card, index) => (
+                      <div
+                        key={index}
+                        className="card-box"
+                        style={{
+                          flex: 1,
+                          maxWidth: "250px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          borderRadius: "14px",
+                          padding: "18px 40px",
+                          backgroundColor: "white",
+                          border: "0.2px solid #ddd",
+                          height: "90px",
+                        }}
+                      >
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                          <span style={{ fontSize: "12px", fontWeight: "400" }}>{card.title}</span>
+                          <span style={{ fontSize: "24px", fontWeight: "500" }}>{card.value}</span>
+                          <span style={{ fontSize: "12px", fontWeight: "400" }}>{card.value1}</span>
+                        </div>
+                        <img src={card.icon} alt={card.title} style={{ width: "22px", height: "22px" }} />
+                      </div>
+                    ))}
                   </div>
+
+                  {/* ✅ Overview Chart Section */}
+                  <OverviewChart />
+                
                 </div>
               }
             />
@@ -205,5 +151,4 @@ export default function Dashboard({ onLogout }) {
       )}
     </div>
   );
-  
 }

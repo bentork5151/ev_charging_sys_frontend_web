@@ -15,6 +15,8 @@ import totalIcon from "../../assets/icons/stafficon/blue.svg";
 import adminIcon from "../../assets/icons/stafficon/toatl.svg";
 import managerIcon from "../../assets/icons/stafficon/yellow.svg";
 import activeIcon from "../../assets/icons/stafficon/red.svg";
+
+import MaintenanceTable from "../../components/admin/MaintenanceTable";
 const Maintenance = () => {
   const [isFormOpen, setIsFormOpen] = useState(null); // ✅ can be "add" or "edit"
 const cards = [
@@ -209,27 +211,7 @@ const cards = [
 
 
         {/* ✅ Staff Table */}
-        <div
-          style={{
-            background: "#fff",
-            borderRadius: "12px",
-            marginTop: "32px",
-            padding: "24px",
-            fontFamily: "Lexend, sans-serif", // ✅ Outer Lexend
-          }}
-        >
-          <h3 style={{ marginBottom: "16px", fontWeight: "bold" }}>
-             Emergency Alerts
-          </h3>
-          <p
-            style={{
-              marginBottom: "16px",
-              color: "#6B7280",
-              fontSize: "14px",
-            }}
-          >
-          Active emergency incidents requiring immediate attention
-          </p>
+        
 
           {/* Search Bar */}
           {/* <input
@@ -247,108 +229,7 @@ const cards = [
           /> */}
 
           {/* Table */}
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "14px",
-            }}
-          >
-            <thead style={{ fontFamily: "Inter, sans-serif" }}>
-              <tr
-                style={{
-                  textAlign: "left",
-                  borderBottom: "1px solid #E5E7EB",
-                }}
-              >
-                <th style={{ padding: "12px" }}>ID</th>
-                <th style={{ padding: "12px" }}>Station</th>
-                <th style={{ padding: "12px" }}>Charger</th>
-                <th style={{ padding: "12px" }}>Issue</th>
-                <th style={{ padding: "12px" }}>Reported </th>
-                <th style={{ padding: "12px" }}>Status</th>
-                <th style={{ padding: "12px" }}>Responded By</th>
-                <th style={{ padding: "12px" }}>Action</th>
-              </tr>
-            </thead>
-            <tbody style={{ fontFamily: "Inter, sans-serif" }}>
-              {staffData.map((staff) => (
-                <tr
-                  key={staff.id}
-                  style={{ borderBottom: "1px solid #F3F4F6" }}
-                >
-                  <td style={{ padding: "12px" }}>
-                    <div
-                      style={{ display: "flex", flexDirection: "column" }}
-                    >
-                      <span style={{ fontWeight: 500 }}>{staff.name}</span>
-                      <span
-                        style={{ fontSize: "12px", color: "#6B7280" }}
-                      >
-                        {staff.email}
-                      </span>
-                    </div>
-                  </td>
-                  <td style={{ padding: "12px" }}>
-                    <span
-                      style={{
-                        background: staff.roleColor,
-                        padding: "7px 14px",
-                        borderRadius: "6px",
-                        fontSize: "12px",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {staff.role}
-                    </span>
-                  </td>
-                  <td style={{ padding: "12px" }}>{staff.status}</td>
-                  <td style={{ padding: "12px" }}>{staff.lastLogin}</td>
-                  <td
-                    style={{
-                      padding: "12px",
-                      display: "flex",
-                      gap: "8px",
-                    }}
-                  >
-                    <button
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: "4px",
-                      }}
-                      onClick={() => setIsFormOpen("edit")} // ✅ Edit opens StaffEditForm
-                    >
-                      <img
-                        src={editIcon}
-                        alt="Edit"
-                        style={{
-                          width: "20px",
-                          height: "20px",
-                        }}
-                      />
-                    </button>
-                    <button
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: "4px",
-                      }}
-                      onClick={() => handleDelete(staff.id)} // ✅ Delete action
-                    >
-                      <img
-                        src={deleteIcon}
-                        alt="Delete"
-                        style={{ width: "20px", height: "20px" }}
-                      />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <MaintenanceTable />
         </div>
 
         {/* ✅ Modal */}
@@ -372,7 +253,7 @@ const cards = [
           </div>
         )}
       </div>
-    </div>
+   
   );
 };
 
