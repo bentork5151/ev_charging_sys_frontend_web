@@ -12,6 +12,7 @@ import totalIcon from "../../assets/icons/stafficon/blue.svg";
 import adminIcon from "../../assets/icons/stafficon/toatl.svg";
 import managerIcon from "../../assets/icons/stafficon/yellow.svg";
 import activeIcon from "../../assets/icons/stafficon/red.svg";
+
 const Users = () => {
   const [isFormOpen, setIsFormOpen] = useState(null); // ✅ can be "add" or "edit"
 const cards = [

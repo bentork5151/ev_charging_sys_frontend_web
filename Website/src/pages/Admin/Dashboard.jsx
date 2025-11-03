@@ -6,6 +6,7 @@ import OverviewChart from "../../components/admin/OverviewChart";
 import LogoutModal from "../../components/admin/LogoutModal";
 import VectorIcon from "../../assets/icons/stafficon/Vector-3.svg";
 
+
 // Pages
 import Stations from "./Stations";
 import Charger from "./Charger";
@@ -128,6 +129,7 @@ export default function Dashboard({ onLogout }) {
 
                   {/* ✅ Overview Chart Section */}
                   <OverviewChart />
+                
                 </div>
               }
             />
