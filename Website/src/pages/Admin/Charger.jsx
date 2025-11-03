@@ -3,6 +3,7 @@ import StaffSummaryCards from "../../components/card/StaffSummaryCards";
 import plusIcon from "../../assets/icons/stafficon/plus.svg";
 import VectorIcon from "../../assets/icons/stafficon/Vector-3.svg";
 import AddCharger from "./form/AddCharger"; // ✅ Correct import (not SessionPage)
+// import DirectoryTable from "../../components/admin/DirectoryTable";
 
 const Charger = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -92,7 +93,7 @@ const Charger = () => {
             </div>
           ))}
         </div>
-
+{/* <DirectoryTable /> */}
         {/* ✅ Conditionally show AddCharger form */}
         {isFormOpen && (
           <div style={{ marginTop: "40px" }}>
