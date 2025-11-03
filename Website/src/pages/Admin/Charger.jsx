@@ -93,7 +93,7 @@ const Charger = () => {
             </div>
           ))}
         </div>
-{/* <DirectoryTable /> */}
+{/* x */}
         {/* ✅ Conditionally show AddCharger form */}
         {isFormOpen && (
           <div style={{ marginTop: "40px" }}>

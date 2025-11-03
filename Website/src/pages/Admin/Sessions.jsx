@@ -10,6 +10,7 @@ import errorIcon from "../../assets/icons/stationicon/red.svg";
 import sortIcon from "../../assets/icons/stationicon/upndown.svg";
 import editIcon from "../../assets/icons/stationicon/edit.svg";
 import deleteIcon from "../../assets/icons/stationicon/delete.svg";
+import SessionChart from "../../components/admin/SessionChart";
 
 
 
@@ -94,45 +95,7 @@ const [open, setOpen] = useState(false);
       </div>
 
       {/* System Health Section */}
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "1106px",
-            height: "320px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            border: "0.2px solid #ddd",
-            borderRadius: "14px",
-            padding: "15px 28px",
-            backgroundColor: "#fff",
-            marginTop: "20px",
-          }}
-        >
-          <div style={{ marginBottom: "20px" }}>
-            <h3 style={{ fontSize: "16px", fontWeight: "600", marginBottom: "5px" }}>
-              System Health Overview
-            </h3>
-            <p style={{ fontSize: "14px", color: "#555", lineHeight: "160%" }}>
-              Real-time monitoring of session performance
-            </p>
-          </div>
-          <div
-            style={{
-              flex: 1,
-              borderRadius: "10px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#888",
-              fontSize: "14px",
-            }}
-          >
-            [Chart / Graph will appear here]
-          </div>
-        </div>
-      </div>
+          <SessionChart />
 
       {/* Records Section */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}>
