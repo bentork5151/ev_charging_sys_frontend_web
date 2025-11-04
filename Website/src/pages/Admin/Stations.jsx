@@ -36,7 +36,7 @@ const Modal = ({ children, onClose }) => (
   </div>
 );
 
-function Stations() {
+function Stations({baseUrl}) {
   const navigate = useNavigate();
 
   const [stations, setStations] = useState([]);
@@ -47,16 +47,20 @@ function Stations() {
       errorToday: '...',
     });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-
-  const baseUrl = "http://localhost:8080/api";
 
   useEffect(() => {
     const fetchStationData  = async () => {
       setLoading(true);
-      setError(null);
+
+      setSummaryData({
+        totalStations: '...',
+        activeStations: '...',
+        averageUptime: '...',
+        errorToday: '...',
+      });
+      setStations([]);
 
     const token = localStorage.getItem("token");
     if (!token) {
@@ -113,32 +117,35 @@ function Stations() {
           averageUptime: `${parseFloat(averageUptime)}%`,
           errorToday,
         });
-        
         setStations(stationRecords);
 
 
     } catch (err) {
-        setError(err.message);
+        console.error("Failed to fetch dashboard data:", err);
         if (err.message.includes('Authentication')) {
             localStorage.removeItem("token");
             navigate("/");
+            return;
         }
+        setSummaryData({
+          totalStations: 'Error',
+          activeStations: 'Error',
+          averageUptime: 'Error',
+          errorToday: 'Error',
+        });
       } finally {
         setLoading(false);
       }
     };
 
   fetchStationData();
-  }, [navigate, refreshKey]);
+  }, [navigate, refreshKey, baseUrl]);
 
   const handleStationAdded = () => {
     setIsModalOpen(false);
     setRefreshKey(prevKey => prevKey + 1);
   };
 
-  if (error) {
-    return <div style={{ color: 'red', padding: '20px' }}>Error: {error}</div>;
-  }
 
   return (
     <div style={{ padding: "20px", fontFamily: "Roboto, sans-serif" }}>
@@ -167,9 +174,8 @@ function Stations() {
               border: "none",
               cursor: "pointer",
             }}
-            onClick={() => setIsModalOpen(true)}>
-                    
-              Add Station
+            onClick={() => setIsModalOpen(true)}>      
+            Add Station
           </button>
       </div>
 
@@ -182,11 +188,6 @@ function Stations() {
           />
         </Modal>
       )}
-
-      {loading && stations.length === 0 ? (
-        <LoadingSpinner />
-      ) : (
-        <>
 
           {/* Summary Cards */}
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
@@ -226,7 +227,9 @@ function Stations() {
             Stations
           </h3>
 
-          {stations.length === 0 ? (
+          {loading ? (
+            <LoadingSpinner />
+          ) : stations.length === 0 ? (
                       <p style={{ textAlign: "center", padding: "20px", color: "#888" }}>
                         No station available.
                       </p>
@@ -280,7 +283,7 @@ function Stations() {
                           {stations.map((sta) => (
                             <tr key={sta.id} style={{backgroundColor: "#fff",borderRadius: "12px",}}>
                               <td style={{ padding: "12px" }}>{sta.name}</td>
-                              <td style={{ padding: "12px" }}>{sta.locationId}</td>
+                              <td style={{ padding: "12px" }}>{sta.locationId || 'N/A'}</td>
                               <td style={{ padding: "12px" }}>
                                 <span
                                   style={{
@@ -328,8 +331,6 @@ function Stations() {
                     )}
                   </div>
                 </div>
-              </>
-            )}
           </div>
         );
 }
