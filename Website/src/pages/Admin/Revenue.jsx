@@ -15,6 +15,7 @@ import VectorIcon from "../../assets/icons/stafficon/Vector-3.svg";
 // import activeIcon from "../../assets/icons/stafficon/red.svg";
 // import searchbar from "../../assets/icons/stafficon/searchbar.svg";
 import SessionTable from "../../components/admin/SessionTable";
+import SearchBar from "../../components/admin/SearchBar";
 
 const Users = () => {
   const [isFormOpen, setIsFormOpen] = useState(null); // ✅ can be "add" or "edit"
@@ -218,24 +219,7 @@ const cards = [
          <br /><br />
           
           <div>
-          <input
-            type="text"
-            
-            
-            placeholder="Search"
-            
-            style={{
-              width: "95%",
-              padding: "12px",
-              border: "1px solid #D1D5DB",
-              borderRadius: "8px",
-              marginBottom: "16px",
-              width:"700px",
-              outline: "none",
-              fontFamily: "Inter, sans-serif", // ✅ Inner Inter
-            }}
-          />
-
+            <SearchBar />
           
           </div>
 
