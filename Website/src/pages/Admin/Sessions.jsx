@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-// import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import SessionPage from "./form/SessionPage";  // ✅ import fixed
 
 
@@ -12,20 +12,110 @@ import editIcon from "../../assets/icons/stationicon/edit.svg";
 import deleteIcon from "../../assets/icons/stationicon/delete.svg";
 import SessionChart from "../../components/admin/SessionChart";
 
+const LoadingSpinner = () => (
+  <div style={{ textAlign: "center", padding: "50px", fontSize: "18px", color: "#555" }}>
+    Loading data...
+  </div>
+);
 
+function Sessions({baseUrl}) {
+  const navigate = useNavigate();
 
-function Sessions() {
   // State to store sessions
   const [sessions, setSessions] = useState([]);
-const [open, setOpen] = useState(false);
+  const [summaryData, setSummaryData] = useState({
+    totalSessions: '...',
+    activeSessions: '...',
+    averageUptime: '...',
+    errorToday: '...',
+  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load sessions from localStorage if exists
-    const storedSessions = localStorage.getItem("sessions");
-    if (storedSessions) {
-      setSessions(JSON.parse(storedSessions));
-    }
-  }, []);
+    const fetchSessionData = async () => {
+      setLoading(true);
+
+      setSummaryData({
+        totalSessions: '...',
+        activeSessions: '...',
+        averageUptime: '...',
+        errorToday: '...',
+      });
+      setSessions([]);
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No token found, redirecting to login.");
+        navigate("/");
+        return;
+      }
+
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+
+      const endpoints = {
+        total: "/sessions/total",
+        active: "/sessions/active",
+        uptime: "/sessions/uptime",
+        errors: "/sessions/error/today",
+        records: "/sessions/all/records",
+      };
+
+      try {
+        const [totalRes,activeRes,uptimeRes,errorsRes,recordsRes] = await Promise.all([
+                                                                                  fetch(baseUrl + endpoints.total, { headers }),
+                                                                                  fetch(baseUrl + endpoints.active, { headers }),
+                                                                                  fetch(baseUrl + endpoints.uptime, { headers }),
+                                                                                  fetch(baseUrl + endpoints.errors, { headers }),
+                                                                                  fetch(baseUrl + endpoints.records, { headers }),
+        ]);
+
+        for (const res of [totalRes, activeRes, uptimeRes, errorsRes, recordsRes]) {
+          if (res.status === 401 || res.status === 403) {
+            throw new Error('Authentication failed. Please log in again.');
+          }
+           if (!res.ok) {
+            throw new Error(`A network request failed: ${res.status}`);
+          }
+        }
+
+        const totalSessions = await totalRes.text();
+        const activeSessions = await activeRes.text();
+        const averageUptime = await uptimeRes.text();
+        const errorToday = await errorsRes.text();
+        const sessionRecords = await recordsRes.json();
+
+        setSummaryData({
+          totalSessions,
+          activeSessions,
+          averageUptime: `${parseFloat(averageUptime)}%`,
+          errorToday,
+        });
+        setSessions(sessionRecords);
+
+      } catch (err) {
+        console.error("Error fetching session data:", err);
+        if (err.message.includes('Authentication failed')) {
+            localStorage.removeItem("token");
+            navigate("/");
+            return;
+        }
+        setSummaryData({
+        totalSessions: 'Error',
+        activeSessions: 'Error',
+        averageUptime: 'Error',
+        errorToday: 'Error',
+      });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSessionData();
+  }, [navigate, baseUrl]);
+
 
   return (
     <div style={{ padding: "20px", fontFamily: "Roboto, sans-serif" }}>
@@ -47,52 +137,28 @@ const [open, setOpen] = useState(false);
         >
           Sessions
         </h2>
-
-       <button
-  style={{
-    width: "160px",
-    height: "45px",
-    borderRadius: "18px",
-    backgroundColor: "#000",
-    color: "#fff",
-    fontSize: "12px",
-    fontWeight: 500,
-    border: "none",
-    cursor: "pointer",
-  }}
-  onClick={() => setOpen(true)}
->
-  Customize
-</button>
-<SessionPage open={open} setOpen={setOpen} />
       </div>
 
-      {/* Summary Cards */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          marginBottom: "20px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            gap: "20px",
-            maxWidth: "1106px",
-            width: "100%",
-          }}
-        >
-          <Card title="Total Sessions" value={sessions.length} icon={totalIcon} />
-          <Card
-            title="Active Sessions"
-            value={sessions.filter((s) => s.status === "Active").length}
-            icon={activeIcon}
-          />
-          <Card title="Average Uptime" value="76%" icon={uptimeIcon} />
-          <Card title="Error Today" value="3" icon={errorIcon} />
-        </div>
-      </div>
+          {/* Summary Cards */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: "20px",
+            }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "20px",
+                maxWidth: "1106px",
+                width: "100%",
+              }}>
+              <Card title="Total Sessions" value={summaryData.totalSessions} icon={totalIcon} />
+              <Card title="Active Sessions" value={summaryData.activeSessions} icon={activeIcon} />
+              <Card title="Average Uptime" value={summaryData.averageUptime} icon={uptimeIcon} />
+              <Card title="Error Today" value={summaryData.errorToday} icon={errorIcon} />
+            </div>
+          </div>
 
       {/* System Health Section */}
           <SessionChart />
@@ -121,7 +187,9 @@ const [open, setOpen] = useState(false);
             Records
           </h3>
 
-          {sessions.length === 0 ? (
+          {loading ? (
+            <LoadingSpinner />
+          ) : sessions.length === 0 ? (
             <p style={{ textAlign: "center", padding: "20px", color: "#888" }}>
               No sessions available.
             </p>
@@ -171,15 +239,9 @@ const [open, setOpen] = useState(false);
                 </tr>
               </thead>
               <tbody>
-                {sessions.map((rec, idx) => (
-                  <tr
-                    key={idx}
-                    style={{
-                      backgroundColor: "#fff",
-                      borderRadius: "12px",
-                    }}
-                  >
-                    <td style={{ padding: "12px" }}>{rec.name}</td>
+                {sessions.map((rec) => (
+                  <tr key={rec.id} style={{backgroundColor: "#fff",borderRadius: "12px",}}>
+                    <td style={{ padding: "12px" }}>{rec.charger?.ocppId || 'N/A'}</td>
                     <td style={{ padding: "12px" }}>{rec.id}</td>
                     <td style={{ padding: "12px" }}>
                       <span
@@ -192,15 +254,14 @@ const [open, setOpen] = useState(false);
                           borderRadius: "15px",
                           fontWeight: 600,
                           fontSize: "12px",
-                          color: rec.status === "Busy" ? "#D0A000" : "#FF0060",
-                          backgroundColor: rec.status === "Busy" ? "#FFF3CC" : "#FFE8E8",
-                        }}
-                      >
+                          color: rec.status === "ACTIVE" ? "#2E7D32" : rec.status === "COMPLETED" ? "#1976D2" : "#D32F2F",
+                          backgroundColor: rec.status === "ACTIVE" ? "#C8E6C9" : rec.status === "COMPLETED" ? "#BBDEFB" : "#FFCDD2",
+                        }}>
                         {rec.status}
                       </span>
                     </td>
-                    <td style={{ padding: "12px" }}>{rec.energy}</td>
-                    <td style={{ padding: "12px" }}>{rec.cost}</td>
+                    <td style={{ padding: "12px" }}>{rec.energyKwh ? `${rec.energyKwh} kWh` : 'N/A'}</td>
+                    <td style={{ padding: "12px" }}>{`₹${rec.cost.toLocaleString('en-IN')}`}</td>
                     <td
                       style={{
                         display: "flex",
@@ -208,8 +269,7 @@ const [open, setOpen] = useState(false);
                         gap: "12px",
                         padding: "12px",
                         alignItems: "center",
-                      }}
-                    >
+                      }}>
                       <img
                         src={editIcon}
                         alt="Edit"
@@ -228,11 +288,6 @@ const [open, setOpen] = useState(false);
           )}
         </div>
       </div>
-
-
-
-
-
     </div>
   );
 }
