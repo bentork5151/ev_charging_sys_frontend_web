@@ -4,6 +4,7 @@ import plusIcon from "../../assets/icons/stafficon/plus.svg";
 import VectorIcon from "../../assets/icons/stafficon/Vector-3.svg";
 import AddCharger from "./form/AddCharger"; // ✅ Correct import (not SessionPage)
 // import DirectoryTable from "../../components/admin/DirectoryTable";
+import ChargerSearchBar from "../../components/admin/ChargerSearchBar";
 
 const Charger = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -93,7 +94,10 @@ const Charger = () => {
             </div>
           ))}
         </div>
+        <br /><br />
 {/* x */}
+   <ChargerSearchBar />
+
         {/* ✅ Conditionally show AddCharger form */}
         {isFormOpen && (
           <div style={{ marginTop: "40px" }}>
