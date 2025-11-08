@@ -4,7 +4,7 @@ import Bottomnav from "../../../components/admin/Bottomnav";
 
 const ACCENT = "#7c3aed";
 
-function EditForm({ plan, onClose, onSave }) {
+function EditForm({ plan, onClose, onSave, baseUrl }) {
   const [formData, setFormData] = useState({
     id: plan?.id || null,
     planName: plan?.planName || "",
@@ -35,12 +35,20 @@ function EditForm({ plan, onClose, onSave }) {
   const handleSubmit = () => setShowModal(true);
 
   const confirmSubmit = async () => {
+
+    if (!formData.chargerType || formData.chargerType === "") {
+      alert("Please select a charger type (AC or DC)");
+      setShowModal(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem("token");
 
-      const res = await fetch(
-        `http://localhost:8080/api/plans/update/${formData.id}`,
-        {
+      const endpoint = "/plans/update";
+      const fullUrl = `${baseUrl}${endpoint}/${formData.id}`;
+
+      const res = await fetch(fullUrl, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -65,13 +73,10 @@ function EditForm({ plan, onClose, onSave }) {
           updated = formData; // fallback if no JSON returned
         }
 
-        // ✅ Tell parent to update list instantly
         if (onSave) onSave(updated);
 
-        // ✅ Close the form automatically
         if (onClose) onClose();
       } else {
-        // ❌ removed alert — only console log
         console.error("Failed to update plan:", await res.text());
       }
     } catch (err) {
@@ -136,12 +141,16 @@ function EditForm({ plan, onClose, onSave }) {
             onChange={handleChange}
             type="number"
           />
-          <FloatingInput
-            label="Charger Type"
-            name="chargerType"
-            value={formData.chargerType}
-            onChange={handleChange}
-          />
+           <FloatingSelect
+              label="Charger Type"
+              name="chargerType"
+              value={formData.chargerType}
+              onChange={handleChange}
+            >
+              <option value="">Select a type</option>
+              <option value="AC">AC</option>
+              <option value="DC">DC</option>
+            </FloatingSelect>
         </div>
 
         <div style={{ textAlign: "center", marginTop: "40px" }}>
@@ -265,6 +274,57 @@ function FloatingInput({ label, name, value, onChange, type = "text" }) {
           border: "1px solid #ccc",
         }}
       />
+    </div>
+  );
+}
+
+function FloatingSelect({ label, name, value, onChange, children }) {
+  const [focused, setFocused] = useState(false);
+  const hasValue = value && value !== "";
+  return (
+    <div style={{ position: "relative", width: "100%" }}>
+      <label
+        style={{
+          position: "absolute",
+          left: 12,
+          top: focused || value ? -8 : "50%",
+          transform: "translateY(-50%)",
+          fontSize: focused || value ? 12 : 14,
+          color: focused ? ACCENT : "#888",
+          background: "#fff",
+          padding: "0 4px",
+          transition: "all 0.2s ease",
+          zIndex: 1,
+          pointerEvents: "none",
+        }}
+      >
+        {label}
+      </label>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        style={{
+          width: "100%",
+          height: 50,
+          padding: "12px 16px",
+          borderRadius: 8,
+          border: "1px solid #ccc",
+          fontSize: 14,
+          background: "#fff",
+          cursor: "pointer",
+          appearance: "none",
+          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+          backgroundPosition: 'right 0.7rem center',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: '1.5em 1.5em',
+          paddingRight: '2.5rem',
+        }}
+      >
+        {children}
+      </select>
     </div>
   );
 }

@@ -1,41 +1,14 @@
 import React from "react";
 
-export default function SessionTable() {
-  const data = [
-    {
-      sessionId: 1000,
-      userId: 2038,
-      chargerId: 316,
-      stationId: 316,
-      amount: "₹320.03",
-      paymentMethod: "RFID Card",
-      transactionId: "TXN1760070130811",
-      status: "Error",
-      createdAt: "9/21/2025, 12:57:14 AM",
-    },
-    {
-      sessionId: 1000,
-      userId: 2038,
-      chargerId: 316,
-      stationId: 316,
-      amount: "₹320.03",
-      paymentMethod: "RFID Card",
-      transactionId: "TXN1760070130811",
-      status: "Error",
-      createdAt: "9/21/2025, 12:57:14 AM",
-    },
-    {
-      sessionId: 1000,
-      userId: 2038,
-      chargerId: 316,
-      stationId: 316,
-      amount: "₹320.03",
-      paymentMethod: "RFID Card",
-      transactionId: "TXN1760070130811",
-      status: "Error",
-      createdAt: "9/21/2025, 12:57:14 AM",
-    },
-  ];
+export default function SessionTable({ records = [] }) {
+
+   if (records.length === 0) {
+    return (
+      <p style={{ textAlign: "center", padding: "40px", color: "#6B7280" }}>
+        No transaction records found.
+      </p>
+    );
+  }
 
   return (
     <div
@@ -45,7 +18,7 @@ export default function SessionTable() {
         overflow: "hidden",
         boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
         margin: "20px auto",
-        width: "90%",
+        width: "100%",
         fontFamily: "'Inter', sans-serif",
       }}
     >
@@ -72,8 +45,22 @@ export default function SessionTable() {
           </tr>
         </thead>
         <tbody>
-          {data.map((row, i) => (
-            <tr key={i}>
+            {records.map((row) => {
+            // NEW: Dynamic styling for the status badge
+            const isCompleted = row.paymentStatus === "success";
+            const isError = row.paymentStatus === "failed";
+            // const statusStyle = {
+            //   display: "inline-block",
+            //   padding: "4px 12px",
+            //   borderRadius: "9999px",
+            //   fontWeight: 500,
+            //   fontSize: "13px",
+            //   backgroundColor: isCompleted ? "#BBDEFB" : isError ? "#fee2e2" : "#F3F4F6", // Blue, Red, or Gray
+            //   color: isCompleted ? "#1976D2" : isError ? "#b91c1c" : "#333",
+            // };
+
+            return(
+            <tr key={row.id}>
               <td style={tdStyle}>{row.sessionId}</td>
               <td style={tdStyle}>{row.userId}</td>
               <td style={tdStyle}>{row.chargerId}</td>
@@ -89,16 +76,17 @@ export default function SessionTable() {
                     borderRadius: "9999px",
                     fontWeight: 500,
                     fontSize: "13px",
-                    backgroundColor: "#fee2e2",
-                    color: "#b91c1c",
+                    backgroundColor: isCompleted ? "#BBDEFB" : isError ? "#fee2e2" : "#F3F4F6", // Blue, Red, or Gray
+                    color: isCompleted ? "#1976D2" : isError ? "#b91c1c" : "#333",
                   }}
                 >
-                  {row.status}
+                  {row.paymentStatus}
                 </span>
               </td>
-              <td style={tdStyle}>{row.createdAt}</td>
+              <td style={tdStyle}>{row.createdAt ? `${new Date(row.createdAt).toLocaleDateString()}` : 'N/A'}</td>
             </tr>
-          ))}
+            );
+            })}
         </tbody>
       </table>
     </div>

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import SessionPage from "./form/SessionPage";  // ✅ import fixed
-
 
 import totalIcon from "../../assets/icons/stationicon/Vector.svg";
 import activeIcon from "../../assets/icons/stationicon/green.svg";
@@ -131,13 +129,23 @@ function Sessions({baseUrl}) {
           style={{
             fontSize: "32px",
             fontWeight: "700",
-            marginBottom: "20px",
+            marginBottom: "0px",
             fontFamily: "Lexend, sans-serif",
           }}
         >
           Sessions
         </h2>
       </div>
+
+      <p
+          style={{
+            fontSize: "14px",
+            color: "#4B5563",
+            marginBottom: "32px",
+          }}
+        >
+          Manage RFID cards & registration
+        </p>
 
           {/* Summary Cards */}
           <div
@@ -249,7 +257,7 @@ function Sessions({baseUrl}) {
                           display: "inline-flex",
                           justifyContent: "center",
                           alignItems: "center",
-                          width: "72px",
+                          width: "82px",
                           height: "26px",
                           borderRadius: "15px",
                           fontWeight: 600,
