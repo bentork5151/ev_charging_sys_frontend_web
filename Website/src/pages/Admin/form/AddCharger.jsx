@@ -1,13 +1,8 @@
 import React, { useState } from "react";
 
-export default function AddChargerForm() {
+export default function AddChargerForm({ onClose }) {   // ✅ accept onClose prop
   const [form, setForm] = useState({
-    // stationName: "",
-    // ocppId: "",
-    // connectorType: "",
-    // chargingType: "AC",
-    // rate: 225,
-    // chargeMode: "",
+    
   });
 
   const handleChange = (e) => {
@@ -18,6 +13,7 @@ export default function AddChargerForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
     alert("✅ Charger Added Successfully:\n" + JSON.stringify(form, null, 2));
+    onClose(); // ✅ close form after saving
   };
 
   return (
@@ -126,7 +122,7 @@ export default function AddChargerForm() {
         </div>
 
         <div style={styles.buttons}>
-          <button type="button" style={styles.dismiss}>
+          <button type="button" style={styles.dismiss} onClick={onClose}> {/* ✅ close form on dismiss */}
             Dismiss
           </button>
           <button type="submit" style={styles.save}>
