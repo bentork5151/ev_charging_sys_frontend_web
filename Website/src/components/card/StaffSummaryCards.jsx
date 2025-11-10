@@ -6,12 +6,12 @@ import adminIcon from "../../assets/icons/stafficon/toatl.svg";
 import managerIcon from "../../assets/icons/stafficon/yellow.svg";
 import activeIcon from "../../assets/icons/stafficon/red.svg";
 
-const StaffSummaryCards = () => {
+const StaffSummaryCards = ({ stats = {} }) => {
   const cards = [
-    { title: "Total Staff", value: "14", icon: totalIcon },
-    { title: "Administrators", value: "1", icon: adminIcon },
-    { title: "Managers", value: "1", icon: managerIcon },
-    { title: "Active", value: "3", icon: activeIcon },
+    { title: "Total Staff", value: stats.totalStaff || "...", icon: totalIcon },
+    { title: "Administrators", value: stats.admins || "...", icon: adminIcon },
+    { title: "Managers", value: stats.managers || "...", icon: managerIcon },
+    { title: "Active", value: stats.active || "...", icon: activeIcon },
   ];
 
   return (

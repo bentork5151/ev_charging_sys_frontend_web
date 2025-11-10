@@ -76,12 +76,12 @@ useEffect(() => {
 
         } catch (err) {
           console.error("Error fetching Revenue data:", err);
+          setError(err.message);
           if (err.message.includes('Authentication failed')) {
               localStorage.removeItem("token");
               navigate("/");
               return;
           }
-          setError(err.message);
       } finally {
         setLoading(false);
       }
