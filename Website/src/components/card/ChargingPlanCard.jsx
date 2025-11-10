@@ -111,7 +111,7 @@ const ChargingPlanCard = ({
           <p style={{ margin: 0 }}>₹ {rate}/kWh</p>
         </div>
         <div>
-          <p style={{ margin: 0, fontWeight: "500" }}>Idle Charge</p>
+          <p style={{ margin: 0, fontWeight: "00" }}>Idle Charge</p>
           <p style={{ margin: 0 }}>₹ {walletDeduction}/min</p>
         </div>
       </div>

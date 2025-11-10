@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import StaffSummaryCards from "../../components/card/StaffSummaryCards";
 import plusIcon from "../../assets/icons/stafficon/plus.svg";
 import editIcon from "../../assets/icons/stafficon/edit.svg";
@@ -6,52 +7,131 @@ import deleteIcon from "../../assets/icons/stafficon/delete.png";
 import AddStaffForm from "./form/AddStaffForm"; 
 import StaffEditForm from "./form/staffedit"; // ✅ Import StaffEditForm
 
-const AdminStaff = () => {
-  const [isFormOpen, setIsFormOpen] = useState(null); // ✅ can be "add" or "edit"
+const LoadingSpinner = () => 
+  <div style={{ textAlign: 'center', padding: '50px' }}>
+    Loading...
+  </div>;
 
-  // ✅ Staff Data in State (so we can delete/edit)
-  const [staffData, setStaffData] = useState([
-    {
-      id: 1,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Admin",
-      roleColor: "#FECACA",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 2,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Employee",
-      roleColor: "#E5E7EB",
-      status: "Inactive",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 3,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Manager",
-      roleColor: "#BFDBFE",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 4,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Employee",
-      roleColor: "#E5E7EB",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-  ]);
+const ErrorDisplay = ({ message }) => 
+  <div style={{ textAlign: 'center', padding: '50px', color: 'red' }}>
+    {message}
+  </div>;
+
+const roleStyles = {
+  Admin: { background: "#FECACA", color: "#B91C1C" },
+  Manager: { background: "#BFDBFE", color: "#1D4ED8" },
+  Staff: { background: "#E5E7EB", color: "#374151" },
+  DEFAULT: { background: "#F3F4F6", color: "#4B5563" },
+};
+
+function AdminStaff({ baseUrl }) {
+  const navigate = useNavigate();
+  const [staffData, setStaffData] = useState([]);
+  const [summaryStats, setSummaryStats] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(null);
+  const [editingStaff, setEditingStaff] = useState(null);
+
+  useEffect(() => {
+    const fetchAllStaffData = async () => {
+      setLoading(true);
+      setError(null);
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/");
+        return;
+      }
+
+      const headers = { 
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+
+      try {
+        const endpoints = {
+          totalAdmin: "/admin/total",
+          totalDealer: "/dealer/total",
+          recrds: "/admin/alladmin",
+        };
+
+        const [
+          adminRes, dealerRes, recoardsRes
+        ] = await Promise.all([
+          fetch(baseUrl + endpoints.totalAdmin, { headers }),
+          fetch(baseUrl + endpoints.totalDealer, { headers }),
+          fetch(baseUrl + endpoints.recrds, { headers }),
+        ]);
+
+        for (const res of [adminRes, dealerRes, recoardsRes]) {
+            if (!res.ok) {
+              throw new Error(`Network request failed: ${res.statusText}`);
+            }
+        }
+
+        const cardsData = {
+          totalAdmin : await adminRes.json(),
+          totalDealer : await dealerRes.json(),
+        };
+        const records = await recoardsRes.json();
+        
+        setSummaryStats(cardsData);
+        setStaffData(records);
+
+      } catch (err) {
+        console.error("Error fetching Revenue data:", err);
+          setError(err.message);
+          if (err.message.includes('Authentication failed')) {
+              localStorage.removeItem("token");
+              navigate("/");
+              return;
+          }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllStaffData();
+  }, [baseUrl, navigate]);
+
 
   // ✅ Delete function
-  const handleDelete = (id) => {
-    setStaffData((prev) => prev.filter((staff) => staff.id !== id));
+  const handleDelete = async (staffId) => {
+    if (!window.confirm("Are you sure you want to delete this staff member?")) {
+      return;
+    }
+    
+    const deleteEndpoint = `${baseUrl}/user/delete/${staffId}`;
+    const token = localStorage.getItem("token");
+    
+    try {
+      const response = await fetch(deleteEndpoint, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete staff member.");
+      }
+      
+      setStaffData((prev) => prev.filter((staff) => staff.id !== staffId));
+      alert("Staff member deleted successfully.");
+
+    } catch (err) {
+      console.error("Delete error:", err);
+      alert(err.message);
+    }
+  };
+
+  const openEditForm = (staff) => {
+    setEditingStaff(staff);
+    setIsFormOpen('edit');
+  };
+
+  const closeForm = () => {
+    setIsFormOpen(null);
+    setEditingStaff(null);
   };
 
   return (
@@ -131,7 +211,7 @@ const AdminStaff = () => {
         </p>
 
         {/* ✅ Cards Section */}
-        <StaffSummaryCards />
+        <StaffSummaryCards stats={{admins: summaryStats.totalAdmin, managers: summaryStats.totalDealer}} />
 
         {/* ✅ Staff Table */}
         <div
@@ -172,6 +252,8 @@ const AdminStaff = () => {
           />
 
           {/* Table */}
+          {loading ? <LoadingSpinner /> : error ? <ErrorDisplay message={error} /> 
+          : (
           <table
             style={{
               width: "100%",
@@ -194,7 +276,10 @@ const AdminStaff = () => {
               </tr>
             </thead>
             <tbody style={{ fontFamily: "Inter, sans-serif" }}>
-              {staffData.map((staff) => (
+              {staffData.map((staff) => {
+
+                const style = roleStyles[staff.role] || roleStyles.DEFAULT;
+                return(
                 <tr
                   key={staff.id}
                   style={{ borderBottom: "1px solid #F3F4F6" }}
@@ -214,7 +299,8 @@ const AdminStaff = () => {
                   <td style={{ padding: "12px" }}>
                     <span
                       style={{
-                        background: staff.roleColor,
+                        background: style.background,
+                        color: style.color,
                         padding: "7px 14px",
                         borderRadius: "6px",
                         fontSize: "12px",
@@ -225,7 +311,7 @@ const AdminStaff = () => {
                     </span>
                   </td>
                   <td style={{ padding: "12px" }}>{staff.status}</td>
-                  <td style={{ padding: "12px" }}>{staff.lastLogin}</td>
+                  <td style={{ padding: "12px" }}>{staff.lastLogin ? new Date(staff.lastLogin).toLocaleString() : 'N/A'}</td>
                   <td
                     style={{
                       padding: "12px",
@@ -240,7 +326,7 @@ const AdminStaff = () => {
                         cursor: "pointer",
                         padding: "4px",
                       }}
-                      onClick={() => setIsFormOpen("edit")} // ✅ Edit opens StaffEditForm
+                      onClick={() => setIsFormOpen(staff)} // ✅ Edit opens StaffEditForm
                     >
                       <img
                         src={editIcon}
@@ -268,9 +354,11 @@ const AdminStaff = () => {
                     </button>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
+          )}
         </div>
 
         {/* ✅ Modal */}
@@ -286,11 +374,8 @@ const AdminStaff = () => {
               zIndex: 1000,
             }}
           >
-            {isFormOpen === "add" ? (
-              <AddStaffForm onClose={() => setIsFormOpen(null)} />
-            ) : (
-              <StaffEditForm onClose={() => setIsFormOpen(null)} />
-            )}
+            {isFormOpen === "add" && <AddStaffForm onClose={closeForm} />}
+            {isFormOpen === "edit" && <StaffEditForm staff={editingStaff} onClose={closeForm} />}
           </div>
         )}
       </div>

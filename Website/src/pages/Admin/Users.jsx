@@ -1,138 +1,205 @@
-// export default function Users() {
-//   return <h2>Users & RFID Cards</h2>;
-// }
-import React, { useState } from "react";
-import StaffSummaryCards from "../../components/card/StaffSummaryCards";
-import plusIcon from "../../assets/icons/stafficon/plus.svg";
-import editIcon from "../../assets/icons/stafficon/edit.svg";
-import deleteIcon from "../../assets/icons/stafficon/delete.png";
-import AddStaffForm from "./form/RegisterCard"; 
-import StaffEditForm from "./form/staffedit"; // ✅ Import StaffEditForm
-import totalIcon from "../../assets/icons/stafficon/blue.svg";
-import adminIcon from "../../assets/icons/stafficon/toatl.svg";
-import managerIcon from "../../assets/icons/stafficon/yellow.svg";
-import activeIcon from "../../assets/icons/stafficon/red.svg";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import RegisterCard from "./form/RegisterCard";
 
-const Users = () => {
-  const [isFormOpen, setIsFormOpen] = useState(null); // ✅ can be "add" or "edit"
-const cards = [
-    { title: "Total Cards", value: "123", icon: totalIcon },
-    { title: "Active ", value: "1", icon: adminIcon },
-    { title: "Inactive Cards", value: "1", icon: managerIcon },
-    { title: "Recently Added", value: "3", icon: activeIcon },
-  ];
-  // ✅ Staff Data in State (so we can delete/edit)
-  const [staffData, setStaffData] = useState([
-    {
-      id: 1,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Admin",
-      roleColor: "#FECACA",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 2,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Employee",
-      roleColor: "#E5E7EB",
-      status: "Inactive",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 3,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Manager",
-      roleColor: "#BFDBFE",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 4,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Employee",
-      roleColor: "#E5E7EB",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-  ]);
+import totalIcon from "../../assets/icons/stationicon/Vector.svg";
+import activeIcon from "../../assets/icons/stationicon/green.svg";
+import uptimeIcon from "../../assets/icons/stationicon/yellow.svg";
+import errorIcon from "../../assets/icons/stationicon/red.svg";
+import sortIcon from "../../assets/icons/stationicon/upndown.svg";
+import editIcon from "../../assets/icons/stationicon/edit.svg";
+import deleteIcon from "../../assets/icons/stationicon/delete.svg";
 
-  // ✅ Delete function
-  const handleDelete = (id) => {
-    setStaffData((prev) => prev.filter((staff) => staff.id !== id));
+const LoadingSpinner = () => (
+  <div style={{ textAlign: "center", padding: "50px", fontSize: "18px", color: "#555" }}>
+    Loading data...
+  </div>
+);
+
+const Modal = ({ children, onClose }) => (
+  <div style={{
+    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    zIndex: 1000,
+  }}>
+    <div style={{
+      backgroundColor: 'white', borderRadius: '16px',
+      width: '90%', height: '90%',
+      maxWidth: '1200px', maxHeight: '800px',
+      display: 'flex', flexDirection: 'column',
+      overflow: 'hidden',
+    }}>
+      {children}
+    </div>
+  </div>
+);
+
+function Users({baseUrl}) {
+  const navigate = useNavigate();
+
+  // State to store user details
+  const [users, setUsers] = useState([]);
+  const [summaryData, setSummaryData] = useState({
+    totalCards: '...',
+    activeCards: '...',
+    inactiveCards: '...',
+    recentyAdded: '...',
+  });
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  // const [isActive, setIsActive] = useState();
+  // const [statusText, setStatusText] = useState();
+
+
+  useEffect(() => {
+    const fetchSessionData = async () => {
+      setLoading(true);
+
+      setSummaryData({
+        totalCards: '...',
+        activeCards: '...',
+        inactiveCards: '...',
+        recentyAdded: '...',
+      });
+      setUsers([]);
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("No token found, redirecting to login.");
+        navigate("/");
+        return;
+      }
+
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+
+      const endpoints = {
+        total: "/rfid-card/total",
+        active: "/rfid-card/active",
+        inactive: "/rfid-card/inactive",
+        recently: "/rfid-card/recent",
+        records: "/rfid-card/all",
+      };
+
+      try {
+        const [totalRes,activeRes,inactiveRes,recentlyRes,recordsRes] = await Promise.all([
+                                                                                  fetch(baseUrl + endpoints.total, { headers }),
+                                                                                  fetch(baseUrl + endpoints.active, { headers }),
+                                                                                  fetch(baseUrl + endpoints.inactive, { headers }),
+                                                                                  fetch(baseUrl + endpoints.recently, { headers }),
+                                                                                  fetch(baseUrl + endpoints.records, { headers }),
+        ]);
+
+        for (const res of [totalRes, activeRes, inactiveRes, recentlyRes, recordsRes]) {
+          if (res.status === 401 || res.status === 403) {
+            throw new Error('Authentication failed. Please log in again.');
+          }
+           if (!res.ok) {
+            throw new Error(`A network request failed: ${res.status}`);
+          }
+        }
+
+        const totalCards = await totalRes.text();
+        const activeCards = await activeRes.text();
+        const inactiveCards = await inactiveRes.text();
+        const recentyAdded = await recentlyRes.text();
+        const userRecords = await recordsRes.json();
+
+        setSummaryData({
+          totalCards,
+          activeCards,
+          inactiveCards : `${parseFloat(inactiveCards)}%`,
+          recentyAdded,
+        });
+
+        const trans = userRecords.map(temp => ({
+          ...temp,
+          active: temp.active ? "ACTIVE" : "INACTIVE"
+        }))
+
+        setUsers(trans);
+        //setIsActive(users.active);
+        // setStatusText(isActive ? "ACTIVE" : "INACTIVE");
+
+      } catch (err) {
+        console.error("Error fetching User/Card data:", err);
+        if (err.message.includes('Authentication failed')) {
+            localStorage.removeItem("token");
+            navigate("/");
+            return;
+        }
+        setUsers([]);
+        setSummaryData({
+        totalCards: 'Error',
+        activeCards: 'Error',
+        inactiveCards: 'Error',
+        recentyAdded: 'Error',
+      });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSessionData();
+  }, [navigate, refreshKey, baseUrl]);
+
+  const handleCardRegistered = () => {
+    setIsModalOpen(false);
+    setRefreshKey(prevKey => prevKey + 1);
   };
 
   return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        fontFamily: "Roboto, sans-serif",
-        background: "var(--Default-Background, #F1F1F1)",
-      }}
-    >
+    <div style={{ padding: "20px", fontFamily: "Roboto, sans-serif" }}>
+      {/* Header */}
       <div
         style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "24px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
-        {/* ✅ Header row */}
-        <div
+        <h2
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: "8px",
+            fontSize: "32px",
+            fontWeight: "700",
+            marginBottom: "0px",
+            fontFamily: "Lexend, sans-serif",
           }}
         >
-          <h2
+          RFID Manager
+        </h2>
+        <button
             style={{
-              fontSize: "32px",
-              fontWeight: "bold",
-              fontFamily: "Lexend, sans-serif",
-              margin: 0,
-            }}
-          >
-            RFID Manager
-          </h2>
-
-          {/* ✅ Add RFID Button */}
-          <button
-            style={{
-              width: "154px",
-              height: "48px",
+              width: "160px",
+              height: "45px",
               borderRadius: "18px",
-              padding: "12px 18px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              backgroundColor: "#1E1E1E", // Black
+              backgroundColor: "#000",
               color: "#fff",
-              fontFamily: "Roboto, sans-serif",
-              fontWeight: 600,
               fontSize: "12px",
+              fontWeight: 500,
               border: "none",
               cursor: "pointer",
             }}
-            onClick={() => setIsFormOpen("add")}
-          >
-            <img
-              src={plusIcon}
-              alt="Add"
-              style={{ width: "24px", height: "24px" }}
-            />
-            <span>Register Card</span>
+            onClick={() => setIsModalOpen(true)}>      
+            Register
           </button>
-        </div>
+      </div>
 
-        <p
+      {isModalOpen && (
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <RegisterCard 
+            onClose={() => setIsModalOpen(false)}
+            onCardRegistered={handleCardRegistered}
+            baseUrl = {baseUrl}
+          />
+        </Modal>
+      )}
+
+      <p
           style={{
             fontSize: "14px",
             color: "#4B5563",
@@ -142,233 +209,176 @@ const cards = [
           Manage RFID cards & registration
         </p>
 
-            {/* ✅ Cards Section */}
-<>
-      <style>
-        {`
-          .cards-container {
-            width: 100%;
-            display: flex;
-            justify-content: space-between; /* ✅ spread across full width */
-            gap: 15px;
-          }
-
-          .card-box {
-            flex: 1; /* ✅ each card grows equally */
-            max-width: 230px; /* prevent too wide */
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-radius: 14px;
-            
-            padding: 12px 20px;
-            background-color: white;
-            border: 0.2px solid #ddd;
-            height: 90px;
-            font-family: Roboto, sans-serif;
-          }
-
-          .card-title {
-            font-size: 12px;
-            line-height: 160%;
-            font-weight: 400;
-          }
-
-          .card-value {
-            font-size: 24px;
-            line-height: 160%;
-            font-weight: 600;
-          }
-
-          .card-icon {
-            width: 22px;
-            height: 22px;
-          }
-        `}
-      </style>
-
-      <div className="cards-container">
-        {cards.map((card, index) => (
-          <div className="card-box" key={index}>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span className="card-title">{card.title}</span>
-              <span className="card-value">{card.value}</span>
+          {/* Summary Cards */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: "20px",
+            }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "20px",
+                maxWidth: "1106px",
+                width: "100%",
+              }}>
+              <Card title="Total Cards" value={summaryData.totalCards} icon={totalIcon} />
+              <Card title="Active Cards" value={summaryData.activeCards} icon={activeIcon} />
+              <Card title="Inactive Cards" value={summaryData.inactiveCards} icon={uptimeIcon} />
+              <Card title="Recently Added" value={summaryData.recentyAdded} icon={errorIcon} />
             </div>
-            <img
-              src={card.icon}
-              alt={`${card.title} icon`}
-              className="card-icon"
-            />
           </div>
-        ))}
-      </div>
-    </>
-    
 
+      {/* System Health Section */}
 
-        {/* ✅ Staff Table */}
+      {/* Records Section */}
+      <div style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}>
         <div
           style={{
-            background: "#fff",
-            borderRadius: "12px",
-            marginTop: "32px",
-            padding: "24px",
-            fontFamily: "Lexend, sans-serif", // ✅ Outer Lexend
+            width: "1140px",
+            minHeight: "324px",
+            border: "0.2px solid #ddd",
+            borderRadius: "14px",
+            padding: "18px",
+            backgroundColor: "#FFFFFF",
+            fontFamily: "Lexend, sans-serif",
           }}
         >
-          <h3 style={{ marginBottom: "16px", fontWeight: "bold" }}>
-             Directory
+          <h3
+            style={{
+              fontWeight: "700",
+              marginBottom: "15px",
+              fontSize: "18px",
+              color: "#1A1A1A",
+            }}
+          >
+            Directory
           </h3>
-          <p
-            style={{
-              marginBottom: "16px",
-              color: "#6B7280",
-              fontSize: "14px",
-            }}
-          >
-            {/* View and manage staff members and their permissions */}
-          </p>
 
-          {/* Search Bar */}
-          {/* <input
-            type="text"
-            placeholder="Search"
-            style={{
-              width: "95%",
-              padding: "12px",
-              border: "1px solid #D1D5DB",
-              borderRadius: "8px",
-              marginBottom: "16px",
-              outline: "none",
-              fontFamily: "Inter, sans-serif", // ✅ Inner Inter
-            }}
-          /> */}
-
-          {/* Table */}
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "14px",
-            }}
-          >
-            <thead style={{ fontFamily: "Inter, sans-serif" }}>
-              <tr
-                style={{
-                  textAlign: "left",
-                  borderBottom: "1px solid #E5E7EB",
-                }}
-              >
-                <th style={{ padding: "12px" }}>Name</th>
-                <th style={{ padding: "12px" }}>Id</th>
-                <th style={{ padding: "12px" }}>Status</th>
-                <th style={{ padding: "12px" }}>Registration Date</th>
-                <th style={{ padding: "12px" }}>Action</th>
-              </tr>
-            </thead>
-            <tbody style={{ fontFamily: "Inter, sans-serif" }}>
-              {staffData.map((staff) => (
-                <tr
-                  key={staff.id}
-                  style={{ borderBottom: "1px solid #F3F4F6" }}
-                >
-                  <td style={{ padding: "12px" }}>
-                    <div
-                      style={{ display: "flex", flexDirection: "column" }}
-                    >
-                      <span style={{ fontWeight: 500 }}>{staff.name}</span>
-                      <span
-                        style={{ fontSize: "12px", color: "#6B7280" }}
+          {loading ? (
+            <LoadingSpinner />
+          ) : users.length === 0 ? (
+            <p style={{ textAlign: "center", padding: "20px", color: "#888" }}>
+              No sessions available.
+            </p>
+          ) : (
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "separate",
+                borderSpacing: "0 12px",
+                fontFamily: "Roboto, sans-serif",
+                fontSize: "14px",
+              }}
+            >
+              <thead>
+                <tr>
+                  {["Name", "ID", "Status", "Registration Date", "Action"].map(
+                    (header, index) => (
+                      <th
+                        key={index}
+                        style={{
+                          padding: "10px 12px",
+                          fontWeight: "600",
+                          textAlign: index === 5 ? "center" : "left",
+                          color: "#333333",
+                          fontSize: "14px",
+                        }}
                       >
-                        {staff.email}
+                        {header !== "Action" ? (
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            {header}
+                            <img
+                              src={sortIcon}
+                              alt="Sort"
+                              style={{
+                                width: "12px",
+                                height: "12px",
+                                cursor: "pointer",
+                              }}
+                            />
+                          </div>
+                        ) : (
+                          header
+                        )}
+                      </th>
+                    )
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((rec) => (
+                  <tr key={rec.id} style={{backgroundColor: "#fff",borderRadius: "12px",}}>
+                    <td style={{ padding: "12px" }}>{rec.user?.name || 'N/A'}</td>
+                    <td style={{ padding: "12px" }}>{rec.cardNumber}</td>
+                    <td style={{ padding: "12px" }}>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          width: "82px",
+                          height: "26px",
+                          borderRadius: "15px",
+                          fontWeight: 600,
+                          fontSize: "12px",
+                          color: rec.active === "ACTIVE" ? "#2E7D32" : "#D32F2F",
+                          backgroundColor: rec.active === "ACTIVE" ? "#C8E6C9" : "#FFCDD2",
+                        }}>
+                        {rec.active}
                       </span>
-                    </div>
-                  </td>
-                  <td style={{ padding: "12px" }}>
-                    <span
+                    </td>
+                    <td style={{ padding: "12px" }}>{rec.createdAt ? `${new Date(rec.createdAt).toLocaleDateString()}` : 'N/A'}</td>
+                    <td
                       style={{
-                        background: staff.roleColor,
-                        padding: "7px 14px",
-                        borderRadius: "6px",
-                        fontSize: "12px",
-                        fontWeight: 500,
-                      }}
-                    >
-                      {staff.role}
-                    </span>
-                  </td>
-                  <td style={{ padding: "12px" }}>{staff.status}</td>
-                  <td style={{ padding: "12px" }}>{staff.lastLogin}</td>
-                  <td
-                    style={{
-                      padding: "12px",
-                      display: "flex",
-                      gap: "8px",
-                    }}
-                  >
-                    <button
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: "4px",
-                      }}
-                      onClick={() => setIsFormOpen("edit")} // ✅ Edit opens StaffEditForm
-                    >
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: "12px",
+                        padding: "12px",
+                        alignItems: "center",
+                      }}>
                       <img
                         src={editIcon}
                         alt="Edit"
-                        style={{
-                          width: "20px",
-                          height: "20px",
-                        }}
+                        style={{ width: "16px", height: "16px", cursor: "pointer" }}
                       />
-                    </button>
-                    <button
-                      style={{
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: "4px",
-                      }}
-                      onClick={() => handleDelete(staff.id)} // ✅ Delete action
-                    >
                       <img
                         src={deleteIcon}
                         alt="Delete"
-                        style={{ width: "20px", height: "20px" }}
+                        style={{ width: "16px", height: "16px", cursor: "pointer" }}
                       />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
-
-        {/* ✅ Modal */}
-        {isFormOpen && (
-          <div
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0,0,0,0.5)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 1000,
-            }}
-          >
-            {isFormOpen === "add" ? (
-              <AddStaffForm onClose={() => setIsFormOpen(null)} />
-            ) : (
-              <StaffEditForm onClose={() => setIsFormOpen(null)} />
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
-};
+}
+
+const Card = ({ title, value, icon }) => (
+  <div
+    style={{
+      flex: 1,
+      display: "flex",
+      alignItems: "center",
+      gap: "16px",
+      backgroundColor: "#FFFFFF",
+      borderRadius: "14px",
+      padding: "18px 22px",
+      border: "0.2px solid #ddd",
+    }}
+  >
+    <img src={icon} alt="icon" style={{ width: "32px", height: "32px" }} />
+    <div>
+      <p style={{ fontSize: "14px", color: "#555", marginBottom: "6px" }}>{title}</p>
+      <h3 style={{ fontSize: "22px", fontWeight: "700", color: "#000" }}>{value}</h3>
+    </div>
+  </div>
+);
 
 export default Users;

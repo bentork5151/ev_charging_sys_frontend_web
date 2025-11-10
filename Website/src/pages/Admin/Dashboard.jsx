@@ -42,7 +42,7 @@ export default function Dashboard({ onLogout }) {
   useEffect(() => {
     const fetchDashboardData = async () => {
       setLoading(true);
-
+      
       const token = localStorage.getItem("token");
       if (!token) {
         console.error("No token found, redirecting to login.");
@@ -111,7 +111,7 @@ export default function Dashboard({ onLogout }) {
 
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
-        if (err.message.includes('Authentication')) {
+        if (error.message.includes('Authentication')) {
             localStorage.removeItem("token");
             navigate("/");
             return;
@@ -236,9 +236,9 @@ export default function Dashboard({ onLogout }) {
             <Route path="charger" element={<Charger />} />
             <Route path="sessions" element={<Sessions baseUrl = {baseUrl} />} />
             <Route path="slot" element={<Slot />} />
-            <Route path="users" element={<Users />} />
+            <Route path="users" element={<Users baseUrl = {baseUrl} />} />
             <Route path="plans" element={<Plans />} />
-            <Route path="revenue" element={<Revenue />} />
+            <Route path="revenue" element={<Revenue baseUrl = {baseUrl} />} />
             <Route path="maintenance" element={<Maintenance />} />
             <Route path="staff" element={<AdminStaff />} />
           </Routes>
