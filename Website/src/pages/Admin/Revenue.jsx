@@ -1,74 +1,100 @@
-// export default function Users() {
-//   return <h2>Users & RFID Cards</h2>;
-// }
-import React, { useState } from "react";
-import StaffSummaryCards from "../../components/card/StaffSummaryCards";
-import plusIcon from "../../assets/icons/stafficon/plus.svg";
-import editIcon from "../../assets/icons/stafficon/edit.svg";
-import deleteIcon from "../../assets/icons/stafficon/delete.png";
-import register from "./form/AddStaffForm"; 
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import StaffEditForm from "./form/staffedit"; // ✅ Import StaffEditForm
-import totalIcon from "../../assets/icons/stafficon/blue.svg";
-import adminIcon from "../../assets/icons/stafficon/toatl.svg";
 import VectorIcon from "../../assets/icons/stafficon/Vector-3.svg";
-// import managerIcon from "../../assets/icons/stafficon/yellow.svg";
-// import activeIcon from "../../assets/icons/stafficon/red.svg";
-// import searchbar from "../../assets/icons/stafficon/searchbar.svg";
 import SessionTable from "../../components/admin/SessionTable";
 import SearchBar from "../../components/admin/SearchBar";
 
-const Users = () => {
-  const [isFormOpen, setIsFormOpen] = useState(null); // ✅ can be "add" or "edit"
-const cards = [
-    { title: "Total Revenue", value: "₹1,34,09.98", value1: "+ ₹53,926 from last month", icon: VectorIcon },
-    { title: "Pending Revenue ", value: "₹219", value1: "- ₹134 from last month", icon: VectorIcon },
-    { title: "Total Transactions", value: "192", value1: "+ 34 from last month", icon: VectorIcon },
-    { title: "Success Rate", value: "39%", value1: "+ 29% from last month", icon: VectorIcon },
-  ];
-  // ✅ Staff Data in State (so we can delete/edit)
-  const [staffData, setStaffData] = useState([
-    {
-      id: 1,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Admin",
-      roleColor: "#FECACA",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 2,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Employee",
-      roleColor: "#E5E7EB",
-      status: "Inactive",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 3,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Manager",
-      roleColor: "#BFDBFE",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 4,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Employee",
-      roleColor: "#E5E7EB",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-  ]);
+const LoadingSpinner = () => 
+  <div style={{ textAlign: 'center', padding: '50px' }}>
+    Loading...
+  </div>;
 
-  // ✅ Delete function
-  const handleDelete = (id) => {
-    setStaffData((prev) => prev.filter((staff) => staff.id !== id));
+const ErrorDisplay = ({ message }) => 
+  <div style={{ textAlign: 'center', padding: '50px', color: 'red' }}>
+    {message}
+  </div>;
+
+const Users = ({ baseUrl }) => {
+  const navigate = useNavigate();
+  const [summaryStats, setSummaryStats] = useState({});
+  const [revenueRecords, setRevenueRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(null); // ✅ can be "add" or "edit"
+
+useEffect(() => {
+  const fetchAllData = async () => {
+    setLoading(true);
+    setError(null);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+        console.error("No token found, redirecting to login.");
+        navigate("/");
+        return;
+    }
+
+    const headers = { 
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+
+      try {
+        const endpoints = {
+          total: "/revenue/total",
+          pending: "/revenue/pending",
+          transactions: "/revenue/transactions/total",
+          rate: "/revenue/success-rate",
+          allRecords: "/revenue/all",
+        };
+
+        const [
+          totalRes, pendingRes, transRes, rateRes, recordsRes
+        ] = await Promise.all([
+          fetch(baseUrl + endpoints.total, { headers }),
+          fetch(baseUrl + endpoints.pending, { headers }),
+          fetch(baseUrl + endpoints.transactions, { headers }),
+          fetch(baseUrl + endpoints.rate, { headers }),
+          fetch(baseUrl + endpoints.allRecords, { headers }),
+        ]);
+
+        for (const res of [totalRes, pendingRes, transRes, rateRes, recordsRes]) {
+            if (!res.ok) {
+              throw new Error(`Network request failed: ${res.statusText}`);
+            }
+        }
+
+        const totalRevenue = await totalRes.json();
+        const pendingRevenue = await pendingRes.json();
+        const totalTransactions = await transRes.json();
+        const successRate = await rateRes.json();
+        const allRecords = await recordsRes.json();
+
+        setSummaryStats({ totalRevenue, pendingRevenue, totalTransactions, successRate });
+        setRevenueRecords(allRecords);
+
+        } catch (err) {
+          console.error("Error fetching Revenue data:", err);
+          setError(err.message);
+          if (err.message.includes('Authentication failed')) {
+              localStorage.removeItem("token");
+              navigate("/");
+              return;
+          }
+      } finally {
+        setLoading(false);
+      }
   };
+    fetchAllData();
+}, [baseUrl, navigate]);
+
+const cards = [
+    { title: "Total Revenue", value: `₹${summaryStats.totalRevenue?.toLocaleString('en-IN') || '...'}` },
+    { title: "Pending Revenue", value: `₹${summaryStats.pendingRevenue?.toLocaleString('en-IN') || '...'}` },
+    { title: "Total Transactions", value: summaryStats.totalTransactions || '...' },
+    { title: "Success Rate", value: `${summaryStats.successRate || '...'}%` },
+  ];
 
   return (
     <div
@@ -105,35 +131,6 @@ const cards = [
           >
             Revenue & Transactions
           </h2>
-
-          {/* ✅ Add Staff Button */}
-          {/* <button
-            style={{
-              width: "154px",
-              height: "48px",
-              borderRadius: "18px",
-              padding: "12px 18px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              backgroundColor: "#1E1E1E", // Black
-              color: "#fff",
-              fontFamily: "Roboto, sans-serif",
-              fontWeight: 600,
-              fontSize: "12px",
-              border: "none",
-              cursor: "pointer",
-            }}
-            onClick={() => setIsFormOpen("add")}
-          >
-            <img
-              src={plusIcon}
-              alt="Add"
-              style={{ width: "24px", height: "24px" }}
-            />
-            <span>Register Card</span>
-          </button> */}
         </div>
 
         <p
@@ -203,10 +200,10 @@ const cards = [
             <div style={{ display: "flex", flexDirection: "column" }}>
               <span className="card-title">{card.title}</span>
               <span className="card-value">{card.value}</span>
-              <span className="card-value1">{card.value1}</span>
+              {/* <span className="card-value1">{card.value1}</span> */}
             </div>
             <img
-              src={card.icon}
+              src={VectorIcon}
               alt={`${card.title} icon`}
               className="card-icon"
             />
@@ -250,7 +247,7 @@ const cards = [
         
 
           {/* Table */}
-           <SessionTable />
+           <SessionTable records={revenueRecords} />
          
         </div>
 
