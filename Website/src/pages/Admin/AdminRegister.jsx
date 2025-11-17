@@ -1,87 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-// ✅ Images
-import ElectricCar from "../../assets/images/electric_car_admin_panel.png";
-import stepStations from "../../assets/images/undraw_browsing-online_rozb.png";
-import stepUsers from "../../assets/images/undraw_files-uploading_qf8u.png";
-import stepSessions from "../../assets/images/undraw_group-project_kow1.png";
-import stepReports from "../../assets/images/undraw_mobile-marketing_7x7m.png";
-import arrowRight from "../../assets/images/arrow.png";
+// import bentork_logo from "/Users/apple/Desktop/ev_charging_sys_frontend_web/Website/src/assets/images/bentork_logo.png";   // <-- Your logo image
 
 export default function AdminRegister() {
   const navigate = useNavigate();
 
-  // 🧠 Form states
   const [fullName, setFullName] = useState("");
   const [emailValue, setEmailValue] = useState("");
   const [contactNo, setContactNo] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // ✨ Focus animation states
-  const [focusedField, setFocusedField] = useState("");
-  const [isMobile, setIsMobile] = useState(false);
-
-  // 📱 Detect screen size
-  useEffect(() => {
-    const checkScreen = () => setIsMobile(window.innerWidth < 768);
-    checkScreen();
-    window.addEventListener("resize", checkScreen);
-    return () => window.removeEventListener("resize", checkScreen);
-  }, []);
-
-  // 🧩 Floating input field generator
-  const renderInput = ({ label, type, value, onChange, name }) => (
-    <div style={{ position: "relative", flex: 1, width: "100%" }}>
-      <label
-        style={{
-          position: "absolute",
-          left: "12px",
-          top: focusedField === name || value ? "-8px" : "50%",
-          transform:
-            focusedField === name || value ? "translateY(0)" : "translateY(-50%)",
-          fontSize: focusedField === name || value ? "12px" : isMobile ? "13px" : "14px",
-          color: focusedField === name ? "violet" : "#888",
-          background: "#fff",
-          padding: "0 4px",
-          zIndex: 1,
-          transition: "all 0.2s ease",
-        }}
-      >
-        {label}
-      </label>
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        onFocus={() => setFocusedField(name)}
-        onBlur={() => setFocusedField("")}
-        style={{
-          padding: "10px",
-          fontSize: isMobile ? "13px" : "14px",
-          border: focusedField === name ? "2px solid violet" : "1px solid #ccc",
-          borderRadius: "6px",
-          width: "100%",
-          height: "44px",
-          outline: "none",
-          transition: "border 0.2s ease",
-        }}
-      />
-    </div>
-  );
-
-  // ✅ Handle Registration
   const handleRegister = async (e) => {
     e.preventDefault();
 
     if (!fullName || !emailValue || !contactNo || !passwordValue || !confirmPassword) {
-      alert("Please fill in all required fields.");
+      alert("Please fill all fields.");
       return;
     }
 
     if (passwordValue !== confirmPassword) {
-      alert("Password and Confirm Password must match.");
+      alert("Passwords do not match!");
       return;
     }
 
@@ -89,7 +28,6 @@ export default function AdminRegister() {
       const response = await fetch("http://localhost:8080/api/admin/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // ✅ Match backend field names
         body: JSON.stringify({
           name: fullName,
           email: emailValue,
@@ -99,244 +37,196 @@ export default function AdminRegister() {
       });
 
       const result = await response.text();
-      console.log("Backend Response:", result);
 
       if (!response.ok) {
-        alert(result || "Registration failed. Please try again.");
+        alert(result || "Registration failed");
         return;
       }
 
-      alert("Registration successful! Redirecting to login...");
+      alert("Registration successful!");
       navigate("/login");
-    } catch (error) {
-      console.error("Registration error:", error);
-      alert("Something went wrong. Please try again later.");
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong!");
     }
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        textAlign: "center",
-        fontFamily: "Roboto, sans-serif",
-        minHeight: "100vh",
-        paddingBottom: "100px",
-      }}
-    >
-      {/* 🧭 Header */}
-      <div>
-        <h1 style={{ fontSize: isMobile ? "16px" : "18px", fontWeight: "700", margin: 0 }}>
-          Admin Panel
-        </h1>
-        <h2
-          style={{
-            fontSize: isMobile ? "26px" : "32px",
-            fontWeight: "900",
-            textDecoration: "underline",
-            margin: 0,
-          }}
-        >
-          BENTORK
-        </h2>
-        <p style={{ fontSize: isMobile ? "12px" : "14px", color: "black", margin: 0 }}>
-          connecting to the modern world
-        </p>
-      </div>
+    <>
+      {/* INTERNAL CSS */}
+      <style>{`
+        .register-container {
+          display: flex;
+          height: 100vh;
+          font-family: Inter, sans-serif;
+        }
 
-      {/* 🚗 Electric Car Image */}
-      <img
-        src={ElectricCar}
-        alt="EV charging"
-        style={{
-          width: isMobile ? "180px" : "221px",
-          height: "auto",
-          position: "absolute",
-          top: "53px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 9999,
-        }}
-      />
+        /* LEFT PANEL */
+        .left-panel {
+          width: 50%;
+          background: #1E1E1E;
+          color: white;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 20px;
+        }
 
-      {/* 📝 Registration Form */}
-      <form
-        onSubmit={handleRegister}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "16px",
-          marginTop: isMobile ? "100px" : "90px",
-          marginBottom: "20px",
-          width: "100%",
-          maxWidth: "372px",
-          padding: isMobile ? "0 12px" : "0",
-        }}
-      >
-        {renderInput({
-          label: "Your Full Name",
-          type: "text",
-          value: fullName,
-          onChange: (e) => setFullName(e.target.value),
-          name: "fullName",
-        })}
+        .logo-img {
+          width: 140px;
+          margin-bottom: 10px;
+        }
 
-        <div
-          style={{
-            display: "flex",
-            gap: "30px",
-            width: "100%",
-            flexDirection: isMobile ? "column" : "row",
-          }}
-        >
-          {renderInput({
-            label: "Email ID",
-            type: "email",
-            value: emailValue,
-            onChange: (e) => setEmailValue(e.target.value),
-            name: "email",
-          })}
+    
 
-          {renderInput({
-            label: "Contact No.",
-            type: "tel",
-            value: contactNo,
-            onChange: (e) => setContactNo(e.target.value),
-            name: "contact",
-          })}
-        </div>
+        .panel-heading {
+          margin-top: 40px;
+          font-size: 26px;
+        }
 
-        <div
-          style={{
-            display: "flex",
-            gap: "30px",
-            width: "100%",
-            flexDirection: isMobile ? "column" : "row",
-          }}
-        >
-          {renderInput({
-            label: "Password",
-            type: "password",
-            value: passwordValue,
-            onChange: (e) => setPasswordValue(e.target.value),
-            name: "password",
-          })}
+        .panel-desc {
+          font-size: 13px;
+          opacity: 0.8;
+          max-width: 260px;
+          text-align: center;
+        }
 
-          {renderInput({
-            label: "Confirm Password",
-            type: "password",
-            value: confirmPassword,
-            onChange: (e) => setConfirmPassword(e.target.value),
-            name: "confirmPassword",
-          })}
-        </div>
+        /* RIGHT PANEL */
+        .right-panel {
+          width: 50%;
+          background: white;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 40px 80px;
+        }
 
-        {/* 🔗 Login Link */}
-        <div
-          style={{
-            fontSize: isMobile ? "11px" : "12px",
-            width: "100%",
-            display: "flex",
-            justifyContent: "right",
-            gap: "6px",
-            marginTop: "4px",
-          }}
-        >
-          <p style={{ margin: 0, color: "black" }}>
-            Already have an Account?
-            <span
-              onClick={() => navigate("/login")}
-              style={{
-                color: "black",
-                fontWeight: "600",
-                textDecoration: "underline",
-                marginLeft: "4px",
-                cursor: "pointer",
-              }}
-            >
-              Login
-            </span>
+        .title {
+          font-size: 28px;
+          margin-bottom: 6px;
+        }
+
+        .subtitle {
+          font-size: 13px;
+          margin-bottom: 30px;
+          opacity: 0.7;
+        }
+
+        .reg-form {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+
+        .reg-input {
+          padding: 12px;
+          width: 100%;
+          font-size: 14px;
+          border: 1px solid #ccc;
+          border-radius: 6px;
+          outline: none;
+        }
+
+        .login-text {
+          font-size: 13px;
+          text-align: right;
+           margin: 0 auto; 
+        }
+
+        .login-text span {
+   
+          text-decoration: underline;
+          cursor: pointer;
+          font-weight: 600;
+        }
+
+        .reg-button {
+  width: 120px;
+  padding: 12px;
+  background: #1E1E1E;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  margin: 0 auto;        
+  display: block;        
+}
+      `}</style>
+
+      {/* PAGE LAYOUT */}
+      <div className="register-container">
+
+        {/* LEFT SECTION */}
+        <div className="left-panel">
+          <img src={"https://raw.githubusercontent.com/bentork5151/assets/refs/heads/main/Logo/logo_inverted.png  "} alt="Bentork Logo" className="logo-img" />
+      
+
+          <h3 className="panel-heading">ADMIN PANEL</h3>
+          <p className="panel-desc">
+            Manage charging stations, users, and sessions all in one place.
           </p>
         </div>
 
-        <button
-          type="submit"
-          style={{
-            width: isMobile ? "100%" : "132px",
-            height: "48px",
-            marginTop: "16px",
-            borderRadius: "6px",
-            padding: "12px 28px",
-            background: "#1E1E1E",
-            color: "white",
-            fontSize: isMobile ? "13px" : "14px",
-            fontWeight: "600",
-            border: "none",
-            cursor: "pointer",
-            transition: "all 250ms ease",
-          }}
-        >
-          Register
-        </button>
-      </form>
+        {/* RIGHT SECTION */}
+        <div className="right-panel">
+          <h2 className="title">Create Account</h2>
+          <p className="subtitle">Fill in the details to get started</p>
 
-      {/* 🧭 Admin Flow Section */}
-      <div
-        style={{
-          marginTop: "40px",
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "40px",
-          width: "100%",
-          maxWidth: "1200px",
-          padding: "20px 12px",
-          textAlign: "center",
-        }}
-      >
-        {[
-          { img: stepStations, title: "Stations", desc: "View and manage all charging stations." },
-          { img: stepUsers, title: "Users", desc: "Add, edit, or remove user accounts." },
-          { img: stepSessions, title: "Sessions", desc: "Monitor active and past charging sessions." },
-          { img: stepReports, title: "Reports", desc: "Analyze usage data and financial reports." },
-        ].map((step, index, arr) => (
-          <div
-            key={index}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              textAlign: "center",
-              gap: "20px",
-              flexDirection: isMobile ? "column" : "row",
-            }}
-          >
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              <img
-                src={step.img}
-                alt={step.title}
-                style={{
-                  width: isMobile ? "80px" : "120px",
-                  height: "auto",
-                  marginBottom: "10px",
-                }}
-              />
-              <p style={{ fontFamily: "Roboto", fontWeight: 600, fontSize: "18px", margin: "0", color: "#000" }}>
-                {step.title}
-              </p>
-              <p style={{ fontFamily: "Roboto", fontWeight: 400, fontSize: "12px", margin: "0", color: "#000000BF" }}>
-                {step.desc}
-              </p>
+          <form className="reg-form" onSubmit={handleRegister}>
+            
+            <input
+              className="reg-input"
+              type="text"
+              placeholder="Your Full Name"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+            />
+
+            <input
+              className="reg-input"
+              type="email"
+              placeholder="Email ID"
+              value={emailValue}
+              onChange={(e) => setEmailValue(e.target.value)}
+            />
+
+            <input
+              className="reg-input"
+              type="tel"
+              placeholder="Contact No."
+              value={contactNo}
+              onChange={(e) => setContactNo(e.target.value)}
+            />
+
+            <input
+              className="reg-input"
+              type="password"
+              placeholder="Password"
+              value={passwordValue}
+              onChange={(e) => setPasswordValue(e.target.value)}
+            />
+
+            <input
+              className="reg-input"
+              type="password"
+              placeholder="Confirm Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+
+            <div className="login-text">
+              Already have an Account?
+              <span onClick={() => navigate("/login")}>Login</span>
             </div>
-            {!isMobile && index < arr.length - 1 && (
-              <img src={arrowRight} alt="Arrow" style={{ width: "80px", height: "auto" }} />
-            )}
-          </div>
-        ))}
+
+            <button className="reg-button" type="submit">
+              Register
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
