@@ -1,261 +1,164 @@
-// export default function Maintenance() {
-//   return <h2>Maintenance & Emergency</h2>;
-// }
-// export default function Users() {
-//   return <h2>Users & RFID Cards</h2>;
-// }
-import React, { useState } from "react";
-import StaffSummaryCards from "../../components/card/StaffSummaryCards";
-import plusIcon from "../../assets/icons/stafficon/plus.svg";
-import editIcon from "../../assets/icons/stafficon/edit.svg";
-import deleteIcon from "../../assets/icons/stafficon/delete.png";
-import register from "./form/AddStaffForm"; 
-import StaffEditForm from "./form/staffedit"; // ✅ Import StaffEditForm
-import totalIcon from "../../assets/icons/stafficon/blue.svg";
-import adminIcon from "../../assets/icons/stafficon/toatl.svg";
-import managerIcon from "../../assets/icons/stafficon/yellow.svg";
-import activeIcon from "../../assets/icons/stafficon/red.svg";
+import React from "react";
 
-import MaintenanceTable from "../../components/admin/MaintenanceTable";
-const Maintenance = () => {
-  const [isFormOpen, setIsFormOpen] = useState(null); // ✅ can be "add" or "edit"
-const cards = [
-    { title: "Active Cases", value: "123", icon: totalIcon },
-    { title: "Scheduled Today ", value: "1", icon: adminIcon },
-    { title: "In Progress", value: "1", icon: managerIcon },
-    { title: "Completed This Week", value: "3", icon: activeIcon },
-  ];
-  // ✅ Staff Data in State (so we can delete/edit)
-  const [staffData, setStaffData] = useState([
-    {
-      id: 1,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Admin",
-      roleColor: "#FECACA",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 2,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Employee",
-      roleColor: "#E5E7EB",
-      status: "Inactive",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 3,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Manager",
-      roleColor: "#BFDBFE",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-    {
-      id: 4,
-      name: "User Name",
-      email: "jane@xyz.com",
-      role: "Employee",
-      roleColor: "#E5E7EB",
-      status: "Active",
-      lastLogin: "2024-01-15 14:30",
-    },
-  ]);
-
-  // ✅ Delete function
-  const handleDelete = (id) => {
-    setStaffData((prev) => prev.filter((staff) => staff.id !== id));
-  };
-
+export default function MaintenanceDashboard() {
   return (
-    <div
-      style={{
-        width: "100%",
-        minHeight: "100vh",
-        fontFamily: "Roboto, sans-serif",
-        background: "var(--Default-Background, #F1F1F1)",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "24px",
-        }}
-      >
-        {/* ✅ Header row */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: "8px",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: "32px",
-              fontWeight: "bold",
-              fontFamily: "Lexend, sans-serif",
-              margin: 0,
-            }}
-          >
-            Emergency & Maintenance
-          </h2>
+    <>
+      {/* INTERNAL CSS */}
+      <style>{`
+        .dashboard-container {
+          display: flex;
+          width: 100%;
+          background: #f5f5f5;
+          min-height: 100vh;
+          padding: 20px;
+          box-sizing: border-box;
+        }
 
-          {/* ✅ Add Staff Button */}
-          <button
-            style={{
-              width: "154px",
-              height: "48px",
-              borderRadius: "18px",
-              padding: "12px 18px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              backgroundColor: "#1E1E1E", // Black
-              color: "#fff",
-              fontFamily: "Roboto, sans-serif",
-              fontWeight: 600,
-              fontSize: "12px",
-              border: "none",
-              cursor: "pointer",
-            }}
-            onClick={() => setIsFormOpen("add")}
-          >
-            <img
-              src={plusIcon}
-              alt="Add"
-              style={{ width: "24px", height: "24px" }}
-            />
-            <span>Maintenance</span>
-          </button>
-        </div>
+        .top-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
 
-        <p
-          style={{
-            fontSize: "14px",
-            color: "#4B5563",
-            marginBottom: "32px",
-          }}
-        >
-          Station Maintenance
-        </p>
+        .maint-btn {
+          padding: 8px 16px;
+          background: #1e2124ff;
+          color: white;
+          border: none;
+          border-radius: 12px;
+          cursor: pointer;
+          font-size: 17px;
+        }
 
-            {/* ✅ Cards Section */}
-<>
-      <style>
-        {`
-          .cards-container {
-            width: 100%;
-            display: flex;
-            justify-content: space-between; /* ✅ spread across full width */
-            gap: 15px;
-          }
+        .card-box {
+          flex: 1;
+          background: #fff;
+          border-radius: 12px;
+          padding: 20px;
+          border: 1px solid #eee;
+        }
 
-          .card-box {
-            flex: 1; /* ✅ each card grows equally */
-            max-width: 230px; /* prevent too wide */
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-radius: 14px;
-            
-            padding: 12px 20px;
-            background-color: white;
-            border: 0.2px solid #ddd;
-            height: 90px;
-            font-family: Roboto, sans-serif;
-          }
+        .records-table {
+          width: 100%;
+          border-collapse: collapse;
+          background: #fff;
+          border-radius: 12px;
+          overflow: hidden;
+        }
 
-          .card-title {
-            font-size: 12px;
-            line-height: 160%;
-            font-weight: 400;
-          }
+        .records-table th, 
+        .records-table td {
+          padding: 12px;
+          text-align: left;
+        }
 
-          .card-value {
-            font-size: 24px;
-            line-height: 160%;
-            font-weight: 600;
-          }
+        .records-table thead {
+          border-bottom: 1px solid #eee;
+          background: #fafafa;
+        }
 
-          .card-icon {
-            width: 22px;
-            height: 22px;
-          }
-        `}
-      </style>
+        .status-badge {
+          background: #ffd6df;
+          color: #d6002a;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 12px;
+        }
 
-      <div className="cards-container">
-        {cards.map((card, index) => (
-          <div className="card-box" key={index}>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span className="card-title">{card.title}</span>
-              <span className="card-value">{card.value}</span>
-            </div>
-            <img
-              src={card.icon}
-              alt={`${card.title} icon`}
-              className="card-icon"
-            />
+        .detail-btn {
+          padding: 4px 10px;
+          border-radius: 6px;
+          border: 1px solid #ccc;
+          background: #fff;
+          cursor: pointer;
+        }
+      `}</style>
+
+      {/* MAIN CONTENT */}
+      <div className="dashboard-container">
+        <div style={{ flex: 1 }}>
+
+          {/* Title + Button Row */}
+          <div className="top-header">
+            <h2 style={{ fontSize: "22px", fontWeight: "600" }}>
+              Emergency & Maintenance
+            </h2>
+
+            {/* New Button */}
+            <button className="maint-btn">Maintenance</button>
           </div>
-        ))}
-      </div>
-    </>
-    
 
+          {/* Top Cards */}
+          <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
+            {[
+              { title: "Active Cases", value: 14 },
+              { title: "Scheduled Today", value: 1 },
+              { title: "In Progress", value: 1 },
+              { title: "Completed This Week", value: 3 },
+            ].map((card) => (
+              <div key={card.title} className="card-box">
+                <p style={{ fontSize: "14px", opacity: 0.7 }}>{card.title}</p>
+                <h3 style={{ fontSize: "26px", marginTop: "10px" }}>{card.value}</h3>
+              </div>
+            ))}
+          </div>
 
-        {/* ✅ Staff Table */}
-        
-
-          {/* Search Bar */}
-          {/* <input
-            type="text"
-            placeholder="Search"
-            style={{
-              width: "95%",
-              padding: "12px",
-              border: "1px solid #D1D5DB",
-              borderRadius: "8px",
-              marginBottom: "16px",
-              outline: "none",
-              fontFamily: "Inter, sans-serif", // ✅ Inner Inter
-            }}
-          /> */}
-
-          {/* Table */}
-          <MaintenanceTable />
-        </div>
-
-        {/* ✅ Modal */}
-        {isFormOpen && (
+          {/* Graph Section */}
           <div
             style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0,0,0,0.5)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 1000,
+              background: "#fff",
+              height: "300px",
+              borderRadius: "12px",
+              marginTop: "20px",
+              border: "1px solid #eee",
+              padding: "20px",
             }}
           >
-            {isFormOpen === "add" ? (
-              <AddStaffForm onClose={() => setIsFormOpen(null)} />
-            ) : (
-              <StaffEditForm onClose={() => setIsFormOpen(null)} />
-            )}
+            <p style={{ fontSize: "14px", opacity: 0.7 }}>Graphical Overview</p>
+            <p style={{ fontSize: "12px" }}>Real-time monitoring data</p>
           </div>
-        )}
+
+          {/* Table Section */}
+          <div style={{ marginTop: "30px" }}>
+            <h3 style={{ marginBottom: "20px" }}>Records</h3>
+
+            <table className="records-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Station</th>
+                  <th>Charger</th>
+                  <th>Issue</th>
+                  <th>Reported</th>
+                  <th>Status</th>
+                  <th>Responded By</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {[1, 2, 3, 4, 5].map((row) => (
+                  <tr key={row} style={{ borderBottom: "1px solid #f2f2f2" }}>
+                    <td>S-82037173</td>
+                    <td>Highway Rest A</td>
+                    <td>Charger #11</td>
+                    <td>Power Surge</td>
+                    <td>1 hrs ago</td>
+                    <td>
+                      <span className="status-badge">Error</span>
+                    </td>
+                    <td>Emergency Team A</td>
+                    <td>
+                      <button className="detail-btn">Details</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+
+            </table>
+          </div>
+        </div>
       </div>
-   
+    </>
   );
-};
-
-export default Maintenance;
-
+}
