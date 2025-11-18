@@ -103,10 +103,8 @@ export default function AdminRegister() {
         }
 
         .title {
-          margin: 0;
-          font-size: 26px;
-          font-weight: 400;
-           font-family: "Gabarito", sans-serif !important;
+          font-size: 28px;
+          margin-bottom: 6px;
         }
 
         .subtitle {
@@ -151,7 +149,7 @@ export default function AdminRegister() {
   border: none;
   border-radius: 20px;
   cursor: pointer;
-  font-weight: 400;
+  font-weight: 600;
   margin: 0 auto;        
   display: block;        
 }
