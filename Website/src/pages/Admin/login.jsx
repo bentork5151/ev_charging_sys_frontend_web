@@ -1,70 +1,14 @@
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// ✅ Images
-import ElectricCar from "../../assets/images/electric_car_admin_panel.png";
-import stepStations from "../../assets/images/undraw_browsing-online_rozb.png";
-import stepUsers from "../../assets/images/undraw_files-uploading_qf8u.png";
-import stepSessions from "../../assets/images/undraw_group-project_kow1.png";
-import stepReports from "../../assets/images/undraw_mobile-marketing_7x7m.png";
-import arrowRight from "../../assets/images/arrow.png";
+
 
 export default function AdminLogin() {
   const navigate = useNavigate();
 
   const [emailValue, setEmailValue] = useState("");
   const [passwordValue, setPasswordValue] = useState("");
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    const checkScreen = () => setIsMobile(window.innerWidth < 768);
-    checkScreen();
-    window.addEventListener("resize", checkScreen);
-    return () => window.removeEventListener("resize", checkScreen);
-  }, []);
-
-  // ✨ Floating input renderer
-  const renderInput = ({ label, type, value, onChange, onFocus, onBlur, focused }) => (
-    <div style={{ position: "relative", width: "100%" }}>
-      <label
-        style={{
-          position: "absolute",
-          left: "12px",
-          top: focused || value ? "-8px" : "50%",
-          transform: focused || value ? "translateY(0)" : "translateY(-50%)",
-          fontSize: focused || value ? "12px" : isMobile ? "13px" : "14px",
-          color: focused ? "violet" : "#888",
-          background: "#fff",
-          padding: "0 4px",
-          zIndex: 1,
-          transition: "all 0.2s ease",
-        }}
-      >
-        {label}
-      </label>
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        onFocus={onFocus}
-        onBlur={onBlur}
-        style={{
-          padding: "10px",
-          fontSize: isMobile ? "13px" : "14px",
-          border: focused ? "2px solid violet" : "1px solid #ccc",
-          borderRadius: "6px",
-          width: "100%",
-          height: "44px",
-          outline: "none",
-          transition: "border 0.2s ease",
-        }}
-      />
-    </div>
-  );
-
-  // ✅ Handle login request
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -77,257 +21,200 @@ export default function AdminLogin() {
       const response = await fetch("http://localhost:8080/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ emailOrMobile: emailValue, password: passwordValue }),
+        body: JSON.stringify({
+          emailOrMobile: emailValue,
+          password: passwordValue,
+        }),
       });
 
       const data = await response.json();
       console.log("Login response:", data);
 
       if (!response.ok) {
-        alert(data.message || "Invalid credentials");
+        alert(data.message || "Invalid login credentials");
         return;
       }
 
-      // ✅ FIXED: Store admin_token
       localStorage.setItem("token", data.token);
+
       alert("Login successful!");
       navigate("/dashboard", { replace: true });
-    } catch (error) {
-      console.error("Login error:", error);
-      alert("Something went wrong. Please try again later.");
+
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("Something went wrong. Try again later.");
     }
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        textAlign: "center",
-        fontFamily: "Roboto, sans-serif",
-        minHeight: "100vh",
-        paddingBottom: "100px",
-      }}
-    >
-      {/* 🧭 Header */}
-      <div>
-        <h1 style={{ fontSize: isMobile ? "16px" : "18px", fontWeight: "700", margin: 0 }}>
-          Admin Panel
-        </h1>
-        <h2
-          style={{
-            fontSize: isMobile ? "26px" : "32px",
-            fontWeight: "900",
-            textDecoration: "underline",
-            margin: 0,
-          }}
-        >
-          BENTORK
-        </h2>
-        <p style={{ fontSize: isMobile ? "12px" : "14px", color: "black", margin: 0 }}>
-          connecting to the modern world
-        </p>
-      </div>
+    <>
+      {/* INTERNAL CSS */}
+      <style>{`
+        .admin-container {
+          display: flex;
+          min-height: 100vh;
+          font-family: Inter, sans-serif;
+        }
 
-      {/* 🚗 Electric Car Image */}
-      <img
-        src={ElectricCar}
-        alt="EV charging"
-        style={{
-          width: isMobile ? "180px" : "221px",
-          height: "auto",
-          position: "absolute",
-          top: "52px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 9999,
-        }}
-      />
+        .left-panel {
+          width: 50%;
+          background: #1E1E1E;
+          color: white;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          padding: 40px;
+        }
 
-      {/* 🧾 Login Form */}
-      <form
-        onSubmit={handleLogin}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "16px",
-          marginTop: isMobile ? "100px" : "100px",
-          marginBottom: "20px",
-          width: "100%",
-          maxWidth: "372px",
-          padding: isMobile ? "0 12px" : "0",
-          position: "relative",
-        }}
-      >
-        {renderInput({
-          label: "Email ID or Mobile Number",
-          type: "text",
-          value: emailValue,
-          onChange: (e) => setEmailValue(e.target.value),
-          onFocus: () => setEmailFocused(true),
-          onBlur: () => setEmailFocused(false),
-          focused: emailFocused,
-        })}
+        .logo-box {
+     
+          padding: 16px 28px;
+          margin-bottom: 22px;
+          text-align: center;
+        }
 
-        {renderInput({
-          label: "Password",
-          type: "password",
-          value: passwordValue,
-          onChange: (e) => setPasswordValue(e.target.value),
-          onFocus: () => setPasswordFocused(true),
-          onBlur: () => setPasswordFocused(false),
-          focused: passwordFocused,
-        })}
+        /* IMG STYLING */
+        .logo-img {
+          width: 180px;
+          height: auto;
+          object-fit: contain;
+        }
 
-        {/* 🔹 Forgot Password & Help */}
-        <div
-          style={{
-            position: "absolute",
-            right: "0",
-            top: isMobile ? "150px" : "155px",
-            display: "flex",
-            gap: "8px",
-            fontSize: isMobile ? "11px" : "12px",
-          }}
-        >
-          <a href="#" style={{ color: "black", textDecoration: "none" }}>
-            Forgot your password?
-          </a>
-          <a
-            href="/help"
-            style={{
-              color: "black",
-              textDecoration: "underline",
-              fontWeight: "600",
-            }}
-          >
-            Help
-          </a>
-        </div>
+        .panel-box {
 
-        {/* 🔘 Buttons */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "12px",
-            width: "100%",
-            marginTop: "40px",
-          }}
-        >
-          <button
-            type="button"
-            onClick={() => navigate("/AdminRegister")}
-            style={{
-              width: isMobile ? "100%" : "132px",
-              height: "48px",
-              borderRadius: "18px",
-              padding: "12px 28px",
-              background: "#1E1E1E",
-              color: "white",
-              fontSize: isMobile ? "13px" : "14px",
-              fontWeight: "600",
-              border: "none",
-              cursor: "pointer",
-              transition: "all 250ms ease",
-            }}
-          >
-            Register
-          </button>
+          padding: 14px 26px;
+          text-align: center;
+        }
 
-          <button
-            type="submit"
-            style={{
-              width: isMobile ? "100%" : "132px",
-              height: "48px",
-              borderRadius: "18px",
-              padding: "12px 28px",
-              background: "#1E1E1E",
-              color: "white",
-              fontSize: isMobile ? "13px" : "14px",
-              fontWeight: "600",
-              border: "none",
-              cursor: "pointer",
-              transition: "all 250ms ease",
-            }}
-          >
-            Login
-          </button>
-        </div>
-      </form>
+        .panel-title {
+          margin: 0;
+          font-size: 22px;
+          letter-spacing: 1px;
+        }
 
-      {/* 🧭 Admin Flow Section */}
-      <div
-        style={{
-          marginTop: "40px",
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "40px",
-          width: "100%",
-          maxWidth: "1200px",
-          padding: "20px 12px",
-          textAlign: "center",
-        }}
-      >
-        {[
-          { img: stepStations, title: "Stations", desc: "View and manage all charging stations." },
-          { img: stepUsers, title: "Users", desc: "Add, edit, or remove user accounts." },
-          { img: stepSessions, title: "Sessions", desc: "Monitor active and past charging sessions." },
-          { img: stepReports, title: "Reports", desc: "Analyze usage data and financial reports." },
-        ].map((step, index, arr) => (
-          <div
-            key={index}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              textAlign: "center",
-              gap: "20px",
-              flexDirection: isMobile ? "column" : "row",
-            }}
-          >
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              <img
-                src={step.img}
-                alt={step.title}
-                style={{
-                  width: isMobile ? "80px" : "120px",
-                  height: "auto",
-                  marginBottom: "10px",
-                }}
-              />
-              <p
-                style={{
-                  fontFamily: "Roboto",
-                  fontWeight: 600,
-                  fontSize: "18px",
-                  margin: "0",
-                  color: "#000",
-                }}
-              >
-                {step.title}
-              </p>
-              <p
-                style={{
-                  fontFamily: "Roboto",
-                  fontWeight: 400,
-                  fontSize: "12px",
-                  margin: "0",
-                  color: "#000000BF",
-                }}
-              >
-                {step.desc}
-              </p>
-            </div>
-            {!isMobile && index < arr.length - 1 && (
-              <img src={arrowRight} alt="Arrow" style={{ width: "80px", height: "auto" }} />
-            )}
+        .panel-desc {
+          margin-top: 8px;
+          font-size: 12px;
+          color: #C0C0C0;
+        }
+
+        .right-panel {
+          width: 50%;
+          background: #FFFFFF;
+          padding: 80px 100px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .login-title {
+          margin: 0;
+          font-size: 26px;
+          font-weight: 400;
+           font-family: "Gabarito", sans-serif !important;
+        }
+
+        .login-sub {
+          margin-top: 6px;
+          margin-bottom: 30px;
+          color: #444;
+        }
+
+        .login-form {
+          display: flex;
+          flex-direction: column;
+          gap: 22px;
+        }
+
+        .input-box {
+          width: 100%;
+          height: 46px;
+          padding: 10px 12px;
+          border-radius: 6px;
+          border: 1px solid #CFCFCF;
+          outline: none;
+          font-size: 15px;
+        }
+
+        .create-text {
+          font-size: 12px;
+        margin: 0 auto; 
+        }
+
+        .create-link {
+          font-weight: 600;
+          text-decoration: underline;
+          cursor: pointer;
+        }
+
+        .login-btn {
+          background: #1E1E1E;
+          color: white;
+          border: none;
+          height: 44px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: 400;
+          cursor: pointer;
+          gap:"10px";
+          width: 120px;
+          margin: 0 auto; 
+        }
+      `}</style>
+
+      {/* MAIN UI */}
+      <div className="admin-container">
+
+        {/* LEFT SIDE */}
+        <div className="left-panel">
+
+   
+          <div className="logo-box">
+            <img src={"https://raw.githubusercontent.com/bentork5151/assets/refs/heads/main/Logo/logo_inverted.png "} alt="Bentork Logo" className="logo-img" />
           </div>
-        ))}
+
+          <div className="panel-box">
+            <h2 className="panel-title">ADMIN PANEL</h2>
+            <p className="panel-desc">
+              Manage charging stations, users, and sessions all in one place.
+            </p>
+          </div>
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="right-panel">
+          <h2 className="login-title">Login</h2>
+          <p className="login-sub">Enter your registered credentials to get started!</p>
+
+          <form onSubmit={handleLogin} className="login-form">
+            <input
+              type="text"
+              placeholder="Email ID or Mobile Number"
+              className="input-box"
+              value={emailValue}
+              onChange={(e) => setEmailValue(e.target.value)}
+            />
+
+            <input
+              type="password"
+              placeholder="Password"
+              className="input-box"
+              value={passwordValue}
+              onChange={(e) => setPasswordValue(e.target.value)}
+            />
+
+            <p className="create-text">
+              Don’t have an Account?{" "}
+              <span className="create-link" onClick={() => navigate("/AdminRegister")}>
+                Create Account
+              </span>
+            </p>
+
+            <button type="submit" className="login-btn">Login</button>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
