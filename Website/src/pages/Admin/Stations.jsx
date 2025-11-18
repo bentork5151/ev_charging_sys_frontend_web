@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddStation from "./form/AddStation";
 
-import totalIcon from "../../assets/icons/stationicon/Vector.svg";
+// import totalIcon from "../../assets/icons/stationicon/Vector.svg";
 import activeIcon from "../../assets/icons/stationicon/green.svg";
 import uptimeIcon from "../../assets/icons/stationicon/yellow.svg";
 import errorIcon from "../../assets/icons/stationicon/red.svg";
@@ -192,7 +192,7 @@ function Stations({baseUrl}) {
           {/* Summary Cards */}
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
             <div style={{ display: "flex", gap: "20px", maxWidth: "1106px", width: "100%" }}>
-              <Card title="Total Stations" value={summaryData.totalStations} icon={totalIcon} />
+            <Card title="Active Stations" value={summaryData.activeStations} icon="https://raw.githubusercontent.com/bentork5151/assets/19d62ecada81d6658614b7da7360f863b727105a/Illustrations/electric-car-8397254_1280.png" />
               <Card title="Active Stations" value={summaryData.activeStations} icon={activeIcon} />
               <Card title="Average Uptime" value={summaryData.averageUptime} icon={uptimeIcon} />
               <Card title="Error Today" value={summaryData.errorToday} icon={errorIcon} />

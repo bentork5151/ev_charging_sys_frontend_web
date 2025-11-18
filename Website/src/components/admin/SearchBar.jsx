@@ -36,9 +36,9 @@ export default function SearchBar() {
       cursor: "pointer",
       color: "#0e0101ff",
       padding: "10px 20px",
-      fontSize: "15px",
+   
     borderRadius: "20px",
-    padding:"10px",
+  
     width:"150px"
 
 
