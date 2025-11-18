@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AddStation from "./form/AddStation";
 
+// import totalIcon from "../../assets/icons/stationicon/Vector.svg";
 import activeIcon from "../../assets/icons/stationicon/green.svg";
 import uptimeIcon from "../../assets/icons/stationicon/yellow.svg";
 import errorIcon from "../../assets/icons/stationicon/red.svg";
@@ -16,61 +17,62 @@ const LoadingSpinner = () => (
   </div>
 );
 
-const Modal = ({ children }) => (
+const Modal = ({ children, onClose }) => (
   <div style={{
-    position: 'fixed',
-    inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000
+    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    zIndex: 1000,
   }}>
     <div style={{
-      backgroundColor: '#fff',
-      borderRadius: '16px',
-      width: '90%',
-      height: '90%',
-      maxWidth: '1200px',
-      maxHeight: '800px',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden'
+      backgroundColor: 'white', borderRadius: '16px',
+      width: '90%', height: '90%',
+      maxWidth: '1200px', maxHeight: '800px',
+      display: 'flex', flexDirection: 'column',
+      overflow: 'hidden',
     }}>
       {children}
     </div>
   </div>
 );
 
-function Stations({ baseUrl }) {
+function Stations({baseUrl}) {
   const navigate = useNavigate();
 
   const [stations, setStations] = useState([]);
   const [summaryData, setSummaryData] = useState({
-    totalStations: "...",
-    activeStations: "...",
-    averageUptime: "...",
-    errorToday: "...",
-  });
-
+      totalStations: '...',
+      activeStations: '...',
+      averageUptime: '...',
+      errorToday: '...',
+    });
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    const fetchStationData = async () => {
+    const fetchStationData  = async () => {
       setLoading(true);
 
-      const token = localStorage.getItem("token");
-      if (!token) {
+      setSummaryData({
+        totalStations: '...',
+        activeStations: '...',
+        averageUptime: '...',
+        errorToday: '...',
+      });
+      setStations([]);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+        console.error("No token found, redirecting to login.");
         navigate("/");
         return;
-      }
+    }
 
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+    };
 
       const endpoints = {
         total: "/stations/total",
@@ -78,202 +80,259 @@ function Stations({ baseUrl }) {
         uptime: "/stations/uptime",
         errors: "/stations/error/today",
         records: "/stations/all",
-      };
+    };
 
-      try {
-        const requests = Object.values(endpoints).map((endpoint) =>
-          fetch(baseUrl + endpoint, { headers })
-        );
-
-        const [
-          totalRes,
-          activeRes,
-          uptimeRes,
-          errorsRes,
-          recordsRes,
-        ] = await Promise.all(requests);
-
-        const failed = [totalRes, activeRes, uptimeRes, errorsRes, recordsRes].find(
-          (res) => !res.ok
-        );
-
-        if (failed) throw new Error("Network request failed.");
-
-        const [
-          totalStations,
-          activeStations,
-          averageUptime,
-          errorToday,
-          stationRecords,
-        ] = await Promise.all([
-          totalRes.text(),
-          activeRes.text(),
-          uptimeRes.text(),
-          errorsRes.text(),
-          recordsRes.json(),
+    try {
+      const [totalRes,activeRes,uptimeRes,errorsRes,recordsRes] = await Promise.all([
+                                                                                  fetch(baseUrl + endpoints.total, { headers }),
+                                                                                  fetch(baseUrl + endpoints.active, { headers }),
+                                                                                  fetch(baseUrl + endpoints.uptime, { headers }),
+                                                                                  fetch(baseUrl + endpoints.errors, { headers }),
+                                                                                  fetch(baseUrl + endpoints.records, { headers }),
         ]);
 
-        setSummaryData({
+      for (const res of [totalRes, activeRes, uptimeRes, errorsRes, recordsRes]) {
+          if (res.status === 401 || res.status === 403) {
+            throw new Error('Authentication failed. Please log in again.');
+          }
+           if (!res.ok) {
+            throw new Error(`A network request failed: ${res.status}`);
+          }
+        }
+
+      const [totalStations, 
+              activeStations, 
+              averageUptime, 
+              errorToday, 
+              stationRecords] = await Promise.all([totalRes.text(), 
+                                                    activeRes.text(), 
+                                                    uptimeRes.text(), 
+                                                    errorsRes.text(), 
+                                                    recordsRes.json()
+                                                  ]);
+
+      setSummaryData({
           totalStations,
           activeStations,
           averageUptime: `${parseFloat(averageUptime)}%`,
           errorToday,
         });
-
         setStations(stationRecords);
-      } catch (error) {
-        console.error(error);
+
+
+    } catch (err) {
+        console.error("Failed to fetch dashboard data:", err);
+        if (err.message.includes('Authentication')) {
+            localStorage.removeItem("token");
+            navigate("/");
+            return;
+        }
         setSummaryData({
-          totalStations: "Error",
-          activeStations: "Error",
-          averageUptime: "Error",
-          errorToday: "Error",
+          totalStations: 'Error',
+          activeStations: 'Error',
+          averageUptime: 'Error',
+          errorToday: 'Error',
         });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchStationData();
-  }, [baseUrl, navigate, refreshKey]);
+  fetchStationData();
+  }, [navigate, refreshKey, baseUrl]);
 
   const handleStationAdded = () => {
     setIsModalOpen(false);
-    setRefreshKey((k) => k + 1);
+    setRefreshKey(prevKey => prevKey + 1);
   };
 
-  return (
-    <div style={{ padding: "20px", fontFamily: "Lexend, sans-serif" }}>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <h2 style={{ fontSize: "32px", fontWeight: 700 }}>Station Management</h2>
 
+  return (
+    <div style={{ padding: "20px", fontFamily: "Roboto, sans-serif" }}>
+      <div style={{ 
+        display: "flex", 
+        justifyContent: "space-between", 
+        alignItems: "center",
+        }}>
+        <h2 style={{ 
+          fontSize: "32px", 
+          fontWeight: "700", 
+          marginBottom: "20px", 
+          fontFamily: "Lexend, sans-serif",
+          }}>
+          Station Management
+        </h2>
         <button
-          style={{
-            width: "160px",
-            height: "45px",
-            borderRadius: "16px",
-            backgroundColor: "#000",
-            color: "#fff",
-            border: "none",
-            cursor: "pointer",
-          }}
-          onClick={() => setIsModalOpen(true)}
-        >
-          Add Station
-        </button>
+            style={{
+              width: "160px",
+              height: "45px",
+              borderRadius: "18px",
+              backgroundColor: "#000",
+              color: "#fff",
+              fontSize: "12px",
+              fontWeight: 500,
+              border: "none",
+              cursor: "pointer",
+            }}
+            onClick={() => setIsModalOpen(true)}>      
+            Add Station
+          </button>
       </div>
 
       {isModalOpen && (
-        <Modal>
-          <AddStation
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <AddStation 
             onClose={() => setIsModalOpen(false)}
             onStationAdded={handleStationAdded}
-            baseUrl={baseUrl}
+            baseUrl = {baseUrl}
           />
         </Modal>
       )}
 
-      {/* Summary Cards */}
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
-        <div style={{ display: "flex", gap: "20px", maxWidth: "1106px", width: "100%" }}>
-          <Card title="Total Stations" value={summaryData.totalStations} icon={activeIcon} />
-          <Card title="Active Stations" value={summaryData.activeStations} icon={activeIcon} />
-          <Card title="Average Uptime" value={summaryData.averageUptime} icon={uptimeIcon} />
-          <Card title="Error Today" value={summaryData.errorToday} icon={errorIcon} />
-        </div>
-      </div>
+          {/* Summary Cards */}
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
+            <div style={{ display: "flex", gap: "20px", maxWidth: "1106px", width: "100%" }}>
+            <Card title="Active Stations" value={summaryData.activeStations} icon="https://raw.githubusercontent.com/bentork5151/assets/19d62ecada81d6658614b7da7360f863b727105a/Illustrations/electric-car-8397254_1280.png" />
+              <Card title="Active Stations" value={summaryData.activeStations} icon={activeIcon} />
+              <Card title="Average Uptime" value={summaryData.averageUptime} icon={uptimeIcon} />
+              <Card title="Error Today" value={summaryData.errorToday} icon={errorIcon} />
+            </div>
+          </div>
 
+      {/* System Health Section */}
+     
       <StationOverviewChart />
 
-      {/* Records */}
+      {/* Records Section */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}>
         <div
           style={{
             width: "1140px",
-            border: "1px solid #ddd",
+            minHeight: "324px",
+            border: "0.2px solid #ddd",
             borderRadius: "14px",
             padding: "18px",
-            backgroundColor: "#fff",
+            backgroundColor: "#FFFFFF",
+            fontFamily: "Lexend, sans-serif",
           }}
         >
-          <h3 style={{ fontSize: "18px", fontWeight: 700 }}>Stations</h3>
+          <h3
+            style={{
+              fontWeight: "700",
+              marginBottom: "15px",
+              fontSize: "18px",
+              color: "#1A1A1A",
+            }}
+          >
+            Stations
+          </h3>
 
           {loading ? (
             <LoadingSpinner />
           ) : stations.length === 0 ? (
-            <p style={{ textAlign: "center", padding: "20px", color: "#888" }}>
-              No stations available.
-            </p>
-          ) : (
-            <table style={{ width: "100%", borderSpacing: "0 12px" }}>
-              <thead>
-                <tr>
-                  {["Name", "Location ID", "Status", "Created At", "Direction Link", "Action"].map(
-                    (header, i) => (
-                      <th
-                        key={i}
-                        style={{ padding: "10px", fontWeight: 600, textAlign: "left" }}
-                      >
-                        {header}
-                        {header !== "Action" && (
-                          <img src={sortIcon} style={{ width: 12, marginLeft: 6 }} />
-                        )}
-                      </th>
-                    )
-                  )}
-                </tr>
-              </thead>
-
-              <tbody>
-                {stations.map((sta) => (
-                  <tr key={sta.id} style={{ background: "#fff", borderRadius: "12px" }}>
-                    <td style={{ padding: 12 }}>{sta.name}</td>
-                    <td style={{ padding: 12 }}>{sta.locationId || "N/A"}</td>
-                    <td style={{ padding: 12 }}>
-                      <span
+                      <p style={{ textAlign: "center", padding: "20px", color: "#888" }}>
+                        No station available.
+                      </p>
+                    ) : (
+                      <table
                         style={{
-                          padding: "6px 14px",
-                          borderRadius: "14px",
-                          fontWeight: 600,
-                          fontSize: "12px",
-                          backgroundColor:
-                            sta.status === "ACTIVE"
-                              ? "#C8E6C9"
-                              : sta.status === "COMPLETED"
-                              ? "#BBDEFB"
-                              : "#FFCDD2",
-                          color:
-                            sta.status === "ACTIVE"
-                              ? "#2E7D32"
-                              : sta.status === "COMPLETED"
-                              ? "#1976D2"
-                              : "#D32F2F",
+                          width: "100%",
+                          borderCollapse: "separate",
+                          borderSpacing: "0 12px",
+                          fontFamily: "Roboto, sans-serif",
+                          fontSize: "14px",
                         }}
                       >
-                        {sta.status}
-                      </span>
-                    </td>
-                    <td style={{ padding: 12 }}>
-                      {new Date(sta.createdAt).toLocaleDateString()}
-                    </td>
-                    <td style={{ padding: 12 }}>
-                      <a href={sta.directionLink} target="_blank" rel="noreferrer">
-                        View Map
-                      </a>
-                    </td>
-                    <td style={{ padding: 12, display: "flex", gap: 12 }}>
-                      <img src={editIcon} style={{ width: 16, cursor: "pointer" }} />
-                      <img src={deleteIcon} style={{ width: 16, cursor: "pointer" }} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+                        <thead>
+                          <tr>
+                            {["Name", "Location ID", "Status", "Created At", "Direction Link", "Action"].map(
+                              (header, index) => (
+                                <th
+                                  key={index}
+                                  style={{
+                                    padding: "10px 12px",
+                                    fontWeight: "600",
+                                    textAlign: index === 5 ? "center" : "left",
+                                    color: "#333333",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  {header !== "Action" ? (
+                                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                      {header}
+                                      <img
+                                        src={sortIcon}
+                                        alt="Sort"
+                                        style={{
+                                          width: "12px",
+                                          height: "12px",
+                                          cursor: "pointer",
+                                        }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    header
+                                  )}
+                                </th>
+                              )
+                            )}
+                          </tr>
+                        </thead>
+                        <tbody>
+
+                          {stations.map((sta) => (
+                            <tr key={sta.id} style={{backgroundColor: "#fff",borderRadius: "12px",}}>
+                              <td style={{ padding: "12px" }}>{sta.name}</td>
+                              <td style={{ padding: "12px" }}>{sta.locationId || 'N/A'}</td>
+                              <td style={{ padding: "12px" }}>
+                                <span
+                                  style={{
+                                    display: "inline-flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    width: "72px",
+                                    height: "26px",
+                                    borderRadius: "15px",
+                                    fontWeight: 600,
+                                    fontSize: "12px",
+                                    color: sta.status === "ACTIVE" ? "#2E7D32" : sta.status === "COMPLETED" ? "#1976D2" : "#D32F2F",
+                                    backgroundColor: sta.status === "ACTIVE" ? "#C8E6C9" : sta.status === "COMPLETED" ? "#BBDEFB" : "#FFCDD2",
+                                  }}>
+                                  {sta.status}
+                                </span>
+                              </td>
+                              <td style={{ padding: "12px" }}>{new Date(sta.createdAt).toLocaleDateString()}</td>
+                              <td style={{ padding: "12px" }}>
+                                <a href={sta.directionLink} target="_blank" rel="Link not available">View Map</a>
+                              </td>
+                              <td
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  gap: "12px",
+                                  padding: "12px",
+                                  alignItems: "center",
+                                }}>
+                                <img
+                                  src={editIcon}
+                                  alt="Edit"
+                                  style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                                />
+                                <img
+                                  src={deleteIcon}
+                                  alt="Delete"
+                                  style={{ width: "16px", height: "16px", cursor: "pointer" }}
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </div>
+          </div>
+        );
 }
 
 const Card = ({ title, value, icon }) => (
@@ -283,16 +342,16 @@ const Card = ({ title, value, icon }) => (
       display: "flex",
       alignItems: "center",
       gap: "16px",
-      backgroundColor: "#fff",
+      backgroundColor: "#FFFFFF",
       borderRadius: "14px",
       padding: "18px 22px",
-      border: "1px solid #ddd",
+      border: "0.2px solid #ddd",
     }}
   >
-    <img src={icon} alt="icon" style={{ width: 32 }} />
+    <img src={icon} alt="icon" style={{ width: "32px", height: "32px" }} />
     <div>
-      <p style={{ fontSize: "14px", color: "#555" }}>{title}</p>
-      <h3 style={{ fontSize: "22px", fontWeight: 700 }}>{value}</h3>
+      <p style={{ fontSize: "14px", color: "#555", marginBottom: "6px" }}>{title}</p>
+      <h3 style={{ fontSize: "22px", fontWeight: "700", color: "#000" }}>{value}</h3>
     </div>
   </div>
 );

@@ -16,6 +16,6 @@ export default defineConfig({
 
   // ⬇⬇ Increase bundle size limit here
   build: {
-    chunkSizeWarningLimit: 1000000, // 100 MB limit
+    chunkSizeWarningLimit: 5000, // 
   },
 });
