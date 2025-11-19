@@ -1,9 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function MaintenanceDashboard() {
+  const navigate = useNavigate();
+
   return (
     <>
-      {/* INTERNAL CSS */}
       <style>{`
         .dashboard-container {
           display: flex;
@@ -13,23 +15,20 @@ export default function MaintenanceDashboard() {
           padding: 20px;
           box-sizing: border-box;
         }
-
         .top-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
         }
-
         .maint-btn {
           padding: 8px 16px;
-          background: #1e2124ff;
+          background: #007bff;
           color: white;
           border: none;
-          border-radius: 12px;
+          border-radius: 6px;
           cursor: pointer;
-          font-size: 17px;
+          font-size: 14px;
         }
-
         .card-box {
           flex: 1;
           background: #fff;
@@ -37,7 +36,6 @@ export default function MaintenanceDashboard() {
           padding: 20px;
           border: 1px solid #eee;
         }
-
         .records-table {
           width: 100%;
           border-collapse: collapse;
@@ -45,18 +43,15 @@ export default function MaintenanceDashboard() {
           border-radius: 12px;
           overflow: hidden;
         }
-
         .records-table th, 
         .records-table td {
           padding: 12px;
           text-align: left;
         }
-
         .records-table thead {
           border-bottom: 1px solid #eee;
           background: #fafafa;
         }
-
         .status-badge {
           background: #ffd6df;
           color: #d6002a;
@@ -64,7 +59,6 @@ export default function MaintenanceDashboard() {
           border-radius: 20px;
           font-size: 12px;
         }
-
         .detail-btn {
           padding: 4px 10px;
           border-radius: 6px;
@@ -74,21 +68,23 @@ export default function MaintenanceDashboard() {
         }
       `}</style>
 
-      {/* MAIN CONTENT */}
       <div className="dashboard-container">
         <div style={{ flex: 1 }}>
 
-          {/* Title + Button Row */}
           <div className="top-header">
             <h2 style={{ fontSize: "22px", fontWeight: "600" }}>
               Emergency & Maintenance
             </h2>
 
-            {/* New Button */}
-            <button className="maint-btn">Maintenance</button>
+            {/* OPEN MAINTENANCE PAGE */}
+            <button
+              className="maint-btn"
+              onClick={() => navigate("/dashboard/maintenance")}
+            >
+              Maintenance
+            </button>
           </div>
 
-          {/* Top Cards */}
           <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
             {[
               { title: "Active Cases", value: 14 },
@@ -98,12 +94,13 @@ export default function MaintenanceDashboard() {
             ].map((card) => (
               <div key={card.title} className="card-box">
                 <p style={{ fontSize: "14px", opacity: 0.7 }}>{card.title}</p>
-                <h3 style={{ fontSize: "26px", marginTop: "10px" }}>{card.value}</h3>
+                <h3 style={{ fontSize: "26px", marginTop: "10px" }}>
+                  {card.value}
+                </h3>
               </div>
             ))}
           </div>
 
-          {/* Graph Section */}
           <div
             style={{
               background: "#fff",
@@ -118,7 +115,6 @@ export default function MaintenanceDashboard() {
             <p style={{ fontSize: "12px" }}>Real-time monitoring data</p>
           </div>
 
-          {/* Table Section */}
           <div style={{ marginTop: "30px" }}>
             <h3 style={{ marginBottom: "20px" }}>Records</h3>
 
