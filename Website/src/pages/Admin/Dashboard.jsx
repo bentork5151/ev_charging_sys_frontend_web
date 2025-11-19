@@ -240,8 +240,13 @@ export default function Dashboard({ onLogout }) {
             <Route path="plans" element={<Plans />} />
             <Route path="revenue" element={<Revenue baseUrl = {baseUrl} />} />
             <Route path="maintenance" element={<Maintenance />} />
+        
+
+
             <Route path="staff" element={<AdminStaff />} />
           </Routes>
+ 
+
         </main>
       </div>
 
