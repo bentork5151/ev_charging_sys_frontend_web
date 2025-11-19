@@ -155,10 +155,11 @@ export default function AdminLogin() {
           height: 44px;
           border-radius: 20px;
           font-size: 12px;
-         
+          font-weight: 400;
           cursor: pointer;
+          gap:"10px";
           width: 120px;
-       
+          margin: 0 auto; 
         }
       `}</style>
 
