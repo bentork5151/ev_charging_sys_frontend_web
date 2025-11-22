@@ -56,7 +56,7 @@ export default function Topbar({ onMenuClick }) {
         <img
           src={settings}
           alt="Settings"
-          style={{ height: "24px", width: "24px", cursor: "pointer" }}
+          style={{ height: "24px", width: "24px", cursor: "pointer" ,fill:"red" }}
         />
       </div>
     </header>

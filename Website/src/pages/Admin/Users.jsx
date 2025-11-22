@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import RegisterCard from "./form/RegisterCard";
+import plusIcon from "../../assets/icons/stafficon/plus.svg";
 
 import totalIcon from "../../assets/icons/stationicon/Vector.svg";
 import activeIcon from "../../assets/icons/stationicon/green.svg";
@@ -184,7 +185,9 @@ function Users({baseUrl}) {
               border: "none",
               cursor: "pointer",
             }}
-            onClick={() => setIsModalOpen(true)}>      
+            onClick={() => setIsModalOpen(true)}>   
+            <img src={plusIcon} alt="Add" style={{ width: "24px", height: "24px", marginRight: "6px" }} />     
+                        
             Register
           </button>
       </div>
