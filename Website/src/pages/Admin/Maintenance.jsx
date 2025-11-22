@@ -22,7 +22,7 @@ export default function MaintenanceDashboard() {
         }
         .maint-btn {
           padding: 8px 16px;
-          background: #007bff;
+          background: #000000ff;
           color: white;
           border: none;
           border-radius: 6px;
