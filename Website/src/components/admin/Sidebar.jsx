@@ -2,17 +2,17 @@
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 
-import dashboardIcon from "../../assets/icons/dasboard.png";
-import stationsIcon from "../../assets/icons/station.png";
-import chargerIcon from "../../assets/icons/charger.png";
-import sessionsIcon from "../../assets/icons/booking.png";
-import slotIcon from "../../assets/icons/slot.png";
-import usersIcon from "../../assets/icons/users.png";
-import plansIcon from "../../assets/icons/plans.png";
-import revenueIcon from "../../assets/icons/revenue.png";
-import maintenanceIcon from "../../assets/icons/maintenance.png";
-import staffIcon from "../../assets/icons/admin.png";
-import logoutIcon from "../../assets/icons/log.png";
+import dashboardIcon from "../../assets/icons/dasboard.svg";
+import stationsIcon from "../../assets/icons/station.svg";
+import chargerIcon from "../../assets/icons/charger.svg";
+import sessionsIcon from "../../assets/icons/booking.svg";
+import slotIcon from "../../assets/icons/slot.svg";
+import usersIcon from "../../assets/icons/RFID.svg";
+import plansIcon from "../../assets/icons/plans.svg";
+import revenueIcon from "../../assets/icons/revenue.svg";
+import maintenanceIcon from "../../assets/icons/maintenance.svg";
+import staffIcon from "../../assets/icons/admin.svg";
+import logoutIcon from "../../assets/icons/log.svg";
 
 import LogoutModal from "../../components/admin/LogoutModal"; // ✅ your modal
 

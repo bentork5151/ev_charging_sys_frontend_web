@@ -1,5 +1,5 @@
 import React from "react";
-import logo from "../../assets/images/bentork_logo.png";
+
 import bell from "../../assets/images/notification_bell.png";
 import settings from "../../assets/images/setting_icon.png";
 
@@ -36,10 +36,10 @@ export default function Topbar({ onMenuClick }) {
         </button>
 
         <img
-          src={logo}
+          src={"https://github.com/bentork5151/assets/blob/main/Logo/bentork_logo.jpg?raw=true"}
           alt="BENTORK"
           style={{
-            height: "50px",
+            height: "100px",
             objectFit: "contain",
             cursor: "pointer",
           }}
@@ -56,7 +56,7 @@ export default function Topbar({ onMenuClick }) {
         <img
           src={settings}
           alt="Settings"
-          style={{ height: "24px", width: "24px", cursor: "pointer" }}
+          style={{ height: "24px", width: "24px", cursor: "pointer" ,fill:"red" }}
         />
       </div>
     </header>

@@ -1,13 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import AdminLogin from "./pages/Admin/login";
-import AdminRegister from "./pages/Admin/AdminRegister";
-import Dashboard from "./pages/Admin/Dashboard";
+import { useEffect, useState, lazy, Suspense } from "react";
+
+// Lazy load pages
+const AdminLogin = lazy(() => import("./pages/Admin/login"));
+const AdminRegister = lazy(() => import("./pages/Admin/AdminRegister"));
+const Dashboard = lazy(() => import("./pages/Admin/Dashboard"));
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem("token"));
 
-  // Keep token in sync with localStorage updates
   useEffect(() => {
     const handleStorageChange = () => {
       setToken(localStorage.getItem("token"));
@@ -18,20 +19,18 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Default route always shows login page */}
-        <Route path="/" element={<AdminLogin />} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Routes>
+          <Route path="/" element={<AdminLogin />} />
+          <Route path="/login" element={<AdminLogin />} />
+          <Route path="/AdminRegister" element={<AdminRegister />} />
 
-        {/* Login & Register */}
-        <Route path="/login" element={<AdminLogin />} />
-        <Route path="/AdminRegister" element={<AdminRegister />} />
-
-        {/* Protected Dashboard */}
-        <Route
-          path="/dashboard/*"
-          element={token ? <Dashboard /> : <Navigate to="/login" replace />}
-        />
-      </Routes>
+          <Route
+            path="/dashboard/*"
+            element={token ? <Dashboard /> : <Navigate to="/login" replace />}
+          />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

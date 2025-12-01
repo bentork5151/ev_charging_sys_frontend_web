@@ -8,6 +8,7 @@ import uptimeIcon from "../../assets/icons/stationicon/yellow.svg";
 import errorIcon from "../../assets/icons/stationicon/red.svg";
 import sortIcon from "../../assets/icons/stationicon/upndown.svg";
 import editIcon from "../../assets/icons/stationicon/edit.svg";
+import plusIcon from "../../assets/icons/stafficon/plus.svg";
 import deleteIcon from "../../assets/icons/stationicon/delete.svg";
 import StationOverviewChart from "../../components/admin/StationOverviewChart";
 
@@ -174,8 +175,9 @@ function Stations({baseUrl}) {
               border: "none",
               cursor: "pointer",
             }}
-            onClick={() => setIsModalOpen(true)}>      
-            Add Station
+            onClick={() => setIsModalOpen(true)}> 
+            <img src={plusIcon} alt="Add" style={{ width: "24px", height: "24px", marginRight: "6px" }} />     
+              Add Station
           </button>
       </div>
 
@@ -192,7 +194,7 @@ function Stations({baseUrl}) {
           {/* Summary Cards */}
           <div style={{ display: "flex", justifyContent: "center", marginBottom: "20px" }}>
             <div style={{ display: "flex", gap: "20px", maxWidth: "1106px", width: "100%" }}>
-              <Card title="Total Stations" value={summaryData.totalStations} icon={totalIcon} />
+            <Card title="Active Stations" value={summaryData.activeStations} icon={totalIcon} />
               <Card title="Active Stations" value={summaryData.activeStations} icon={activeIcon} />
               <Card title="Average Uptime" value={summaryData.averageUptime} icon={uptimeIcon} />
               <Card title="Error Today" value={summaryData.errorToday} icon={errorIcon} />
