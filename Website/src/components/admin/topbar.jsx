@@ -1,7 +1,7 @@
 import React from "react";
 
-import bell from "../../assets/images/notification_bell.png";
-import settings from "../../assets/images/setting_icon.png";
+import bell from "../../assets/images/notification_bell.svg";
+import settings from "../../assets/images/setting_icon.svg";
 
 export default function Topbar({ onMenuClick }) {
   return (

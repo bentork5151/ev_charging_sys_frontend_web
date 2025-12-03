@@ -233,7 +233,7 @@ export default function Dashboard({ onLogout }) {
               }
             />
             <Route path="stations" element={<Stations baseUrl = {baseUrl} />} />
-            <Route path="charger" element={<Charger />} />
+            <Route path="charger" element={<Charger baseUrl = {baseUrl} />} />
             <Route path="sessions" element={<Sessions baseUrl = {baseUrl} />} />
             <Route path="slot" element={<Slot />} />
             <Route path="users" element={<Users baseUrl = {baseUrl} />} />

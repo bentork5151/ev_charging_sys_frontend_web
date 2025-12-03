@@ -1,19 +1,84 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import StaffSummaryCards from "../../components/card/StaffSummaryCards";
 import plusIcon from "../../assets/icons/stafficon/plus.svg";
 import VectorIcon from "../../assets/icons/stafficon/Vector-3.svg";
+import SessionTable from "../../components/admin/SessionTable";
 import AddCharger from "./form/AddCharger"; // ✅ Correct import (not SessionPage)
 // import DirectoryTable from "../../components/admin/DirectoryTable";
 import ChargerSearchBar from "../../components/admin/ChargerSearchBar";
 
-const Charger = () => {
+function Charger({baseUrl}) {
+  const navigate = useNavigate();
+  const [chargerData, setChargerData] = useState({});
+  const [chargerRecoards, setChargerRecoards] = useState({});
   const [isFormOpen, setIsFormOpen] = useState(false);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = localStorage.getItem('token')
+      if(!token){
+        console.error('Token not found, redirecting to login')
+        navigate('/')
+        return;
+      }
+
+      const headers = {
+        'Authorization' : `Bearer ${token}`,
+        'Content-Type' : 'application/json'
+      }
+
+      try {
+
+        const endpoints = {
+          total: '/chargers/total',
+          available: '/chargers/available',
+          acCharger: '/chargers/ac',
+          dcCharger: '/chargers/dc',
+          allRecoards: '/chargers/all'
+        }
+
+        const [totalRes, availableRes, acChargerRes, dcChargerRes] = await Promise.all([
+          fetch(baseUrl + endpoints.total, {headers}),
+          fetch(baseUrl + endpoints.available, {headers}),
+          fetch(baseUrl + endpoints.acCharger, {headers}),
+          fetch(baseUrl + endpoints.dcCharger, {headers}),
+          fetch(baseUrl + endpoints.allRecoards, {headers})
+        ]);
+
+        for(const res of [totalRes, availableRes, acChargerRes, dcChargerRes]){
+          if(!res.ok){
+            throw new Error('Network request failed',res.statusText)
+          }
+        }
+
+        const totalData = totalRes.json()
+        const availableData = availableRes.json()
+        const acChargerData = acChargerRes.json()
+        const dcChargerData = dcChargerRes.json()
+        const allRecoardsData = allRecoards.json()
+
+        setChargerData({totalData, availableData, acChargerData, dcChargerData});
+        setChargerRecoards(allRecoardsData);
+
+      } catch (error) {
+        console.error('Failed to fetch charger data',error)
+        if(error.message.includes('Authentication failed')){
+          console.error('Authentication error, navigating to login',error)
+          navigate('/')
+          return;
+        }
+      }
+    };
+
+    fetchData();
+  }, [baseUrl, navigate]);
+
   const cards = [
-    { title: "Total Chargers", value: "123", value1: "+317 from last month", icon: VectorIcon },
-    { title: "Available Chargers", value: "1", value1: "+23 from last month", icon: VectorIcon },
-    { title: "AC Chargers", value: "1", value1: "+23 from last month", icon: VectorIcon },
-    { title: "DC Chargers", value: "3", value1: "+23 from last month", icon: VectorIcon },
+    { title: "Total Chargers", value: `${chargerData.totalData || '...'}`, value1: "+317 from last month", icon: VectorIcon },
+    { title: "Available Chargers", value: `${chargerData.availableData || '...'}`, value1: "+23 from last month", icon: VectorIcon },
+    { title: "AC Chargers", value: `${chargerData.acChargerData || '...'}`, value1: "+23 from last month", icon: VectorIcon },
+    { title: "DC Chargers", value: `${chargerData.dcChargerData || '...'}`, value1: "+23 from last month", icon: VectorIcon },
   ];
 
   return (
@@ -97,6 +162,8 @@ const Charger = () => {
         <br /><br />
 {/* x */}
    <ChargerSearchBar />
+
+   {/* <SessionTable records={chargerRecoards} /> */}
 
         {/* ✅ Conditionally show AddCharger form */}
         {isFormOpen && (
