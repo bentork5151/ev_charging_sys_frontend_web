@@ -4,7 +4,7 @@ import EditForm from "../../pages/Admin/form/editform";
 
 const ACCENT = "#7c3aed";
 
-export default function PlansPage() {
+export default function PlansPage({baseUrl}) {
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -26,7 +26,7 @@ export default function PlansPage() {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    fetch("http://localhost:8080/api/plans/all", {
+    fetch(`${baseUrl}/plans/all`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -56,7 +56,7 @@ export default function PlansPage() {
     if (!window.confirm("Are you sure you want to delete this plan?")) return;
 
     try {
-      const res = await fetch(`http://localhost:8080/api/plans/delete/${id}`, {
+      const res = await fetch(`${baseUrl}/plans/delete/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -97,7 +97,7 @@ export default function PlansPage() {
     const token = localStorage.getItem("token");
 
     try {
-      const res = await fetch("http://localhost:8080/api/plans/add", {
+      const res = await fetch(`${baseUrl}/plans/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -129,7 +129,7 @@ export default function PlansPage() {
   const refreshPlans = async () => {
     const token = localStorage.getItem("token");
     try {
-      const res = await fetch("http://localhost:8080/api/plans/all", {
+      const res = await fetch(`${baseUrl}/plans/all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
