@@ -152,6 +152,66 @@ function Charger({baseUrl}) {
     setRefreshKey(prevKey => prevKey + 1);
   }
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = localStorage.getItem('token')
+      if(!token){
+        console.error('Token not found, redirecting to login')
+        navigate('/')
+        return;
+      }
+
+      const headers = {
+        'Authorization' : `Bearer ${token}`,
+        'Content-Type' : 'application/json'
+      }
+
+      try {
+
+        const endpoints = {
+          total: '/chargers/total',
+          available: '/chargers/available',
+          acCharger: '/chargers/ac',
+          dcCharger: '/chargers/dc',
+          allRecoards: '/chargers/all'
+        }
+
+        const [totalRes, availableRes, acChargerRes, dcChargerRes] = await Promise.all([
+          fetch(baseUrl + endpoints.total, {headers}),
+          fetch(baseUrl + endpoints.available, {headers}),
+          fetch(baseUrl + endpoints.acCharger, {headers}),
+          fetch(baseUrl + endpoints.dcCharger, {headers}),
+          fetch(baseUrl + endpoints.allRecoards, {headers})
+        ]);
+
+        for(const res of [totalRes, availableRes, acChargerRes, dcChargerRes]){
+          if(!res.ok){
+            throw new Error('Network request failed',res.statusText)
+          }
+        }
+
+        const totalData = totalRes.json()
+        const availableData = availableRes.json()
+        const acChargerData = acChargerRes.json()
+        const dcChargerData = dcChargerRes.json()
+        const allRecoardsData = allRecoards.json()
+
+        setChargerData({totalData, availableData, acChargerData, dcChargerData});
+        setChargerRecoards(allRecoardsData);
+
+      } catch (error) {
+        console.error('Failed to fetch charger data',error)
+        if(error.message.includes('Authentication failed')){
+          console.error('Authentication error, navigating to login',error)
+          navigate('/')
+          return;
+        }
+      }
+    };
+
+    fetchData();
+  }, [baseUrl, navigate]);
+
   const cards = [
     { title: "Total Chargers", value: chargerData.totalData, value1: "+317 from last month", icon: VectorIcon },
     { title: "Available Chargers", value: chargerData.availableData, value1: "+23 from last month", icon: VectorIcon },
