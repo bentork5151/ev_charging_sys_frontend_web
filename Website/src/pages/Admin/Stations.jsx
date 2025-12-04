@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy } from "react";
 import { useNavigate } from "react-router-dom";
-import AddStation from "./form/AddStation";
+// import AddStation from "./form/AddStation";
 
 import totalIcon from "../../assets/icons/stationicon/Vector.svg";
 import activeIcon from "../../assets/icons/stationicon/green.svg";
@@ -11,6 +11,8 @@ import editIcon from "../../assets/icons/stationicon/edit.svg";
 import plusIcon from "../../assets/icons/stafficon/plus.svg";
 import deleteIcon from "../../assets/icons/stationicon/delete.svg";
 import StationOverviewChart from "../../components/admin/StationOverviewChart";
+
+const AddStation = lazy(() => import('./form/AddStation'));
 
 const LoadingSpinner = () => (
   <div style={{ textAlign: "center", padding: "50px", fontSize: "18px", color: "#555" }}>
@@ -63,12 +65,12 @@ function Stations({baseUrl}) {
       });
       setStations([]);
 
-    const token = localStorage.getItem("token");
-    if (!token) {
-        console.error("No token found, redirecting to login.");
-        navigate("/");
-        return;
-    }
+    // const token = localStorage.getItem("token");
+    // if (!token) {
+    //     console.error("No token found, redirecting to login.");
+    //     navigate("/");
+    //     return;
+    // }
 
     const headers = {
         'Authorization': `Bearer ${token}`,
