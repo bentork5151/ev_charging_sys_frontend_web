@@ -43,12 +43,12 @@ export default function Dashboard({ onLogout }) {
     const fetchDashboardData = async () => {
       setLoading(true);
       
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.error("No token found, redirecting to login.");
-        navigate("/");
-        return;
-      }
+      // const token = localStorage.getItem("token");
+      // if (!token) {
+      //   console.error("No token found, redirecting to login.");
+      //   navigate("/");
+      //   return;
+      // }
 
       const headers = {
         'Authorization': `Bearer ${token}`,
@@ -237,7 +237,7 @@ export default function Dashboard({ onLogout }) {
             <Route path="sessions" element={<Sessions baseUrl = {baseUrl} />} />
             <Route path="slot" element={<Slot />} />
             <Route path="users" element={<Users baseUrl = {baseUrl} />} />
-            <Route path="plans" element={<Plans />} />
+            <Route path="plans" element={<Plans baseUrl = {baseUrl} />} />
             <Route path="revenue" element={<Revenue baseUrl = {baseUrl} />} />
             <Route path="maintenance" element={<Maintenance />} />
         

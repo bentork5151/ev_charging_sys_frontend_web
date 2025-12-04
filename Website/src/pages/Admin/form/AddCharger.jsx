@@ -1,37 +1,177 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-export default function AddChargerForm({ onClose }) {   // ✅ accept onClose prop
+export default function AddChargerForm({ onClose, onChargerAdded, baseUrl }) {   // ✅ accept onClose prop
   const [form, setForm] = useState({
-    
+    stationId:"",
+    stationName:"",
+    ocppId:"",
+    connectorType:"",
+    chargerType:"AC",
+    rate:"15",
+    isOccupied:"false",
+    availability:"true"
   });
+  const [stations ,setStations] = useState([]);
+  const [isLoadingStation, setIsLoadingStation] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStations = async () => {
+      setIsLoadingStation(true);
+
+      // const token = localStorage.getItem('token');
+      // if(!token){
+      //   console.error('Authentication error')
+      //   setError('Authentication Failed, please login again');
+      //   setIsLoadingStation(false);
+      //   return;
+      // }
+
+      try{
+        const response = await fetch(`${baseUrl}/stations/all`, {
+          headers: {
+            'Authorization' : `Bearer ${token}`,
+            'Content-Type' : 'application/json'
+          }
+        })
+
+        if(!response.ok){
+          throw new Error('Failed to fetch station data')
+        }
+
+        const data = await response.json();
+        setStations(data);
+
+      } catch (error) {
+        console.error('Failed to load station',error)
+        setError('Failed to load Station Data');
+      } finally {
+        setIsLoadingStation(false);
+      }
+    };
+
+    fetchStations();
+  }, [baseUrl]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    const { name, value, type } = e.target;
+    if ( name === 'stationId'){
+      const selectedStation = stations.find(s => s.id.toString() === value);
+      setForm({
+        ...form,
+        stationId: value,
+        stationName: selectedStation?.name || ''
+      })
+    }
+    else if ( type === 'checkBox'){
+      setForm({ ...form, [name] : e.target.checked});
+    }
+    else if (name === 'rate') {
+      setForm({ ...form, [name] : parseFloat(value) });
+    }
+    else {
+      setForm({ ...form, [name] : value });
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("✅ Charger Added Successfully:\n" + JSON.stringify(form, null, 2));
-    onClose(); // ✅ close form after saving
+    setError(null);
+
+    if(!form.stationId){
+      setError('Select a station')
+      return;
+    }
+    if(!form.ocppId){
+      setError('enter ocppid')
+      return;
+    }
+    if(!form.connectorType){
+      setError('select a Connector Type')
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try{
+      const token = localStorage.getItem('token')
+      if(!token) {
+        console.error('Authentication error')
+        setError('Authentication Failed, please login again');
+        setIsLoadingStation(false);
+        return;
+      }
+
+      const payload = {
+        stationId: form.stationId,
+        ocppId: form.ocppId,
+        connectorType: form.connectorType,
+        chargerType: form.chargerType,
+        rate: form.rate,
+        isOccupied: form.isOccupied,
+        availability: form.availability
+      }
+
+      console.log('Adding charger: ',payload)
+
+      const response = await fetch(`${baseUrl}/chargers/add`, {
+        method: 'POST',
+        headers: {
+          'Authorization' : `Bearer ${token}`,
+          'Content-Type' : 'application/json'
+        },
+        body: JSON.stringify(payload)
+      })
+
+      if(!response.ok){
+        console.error('Failed to add charger')
+        setError('Failed to Add Charger, try again');
+        alert('Failed to add the charger')
+        return;
+      }
+
+      alert('Charger Added Successfully');
+      onChargerAdded();
+    } catch (error) {
+      console.error('Failed to add charger')
+      setError('Failed to add Chager');
+    } finally {
+      setIsSubmitting(false)
+    }
   };
 
   return (
     <div style={styles.container}>
       <h2 style={styles.heading}>Add Charger</h2>
 
+      {/* Error */}
+      {error && (
+        <div style={styles.errorBox}>
+          {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} style={styles.form}>
         <div style={styles.row}>
           <div style={styles.field}>
             <label style={styles.label}>Station Name</label>
-            <input
-              type="text"
-              name="stationName"
-              value={form.stationName}
+            <select
+              name="stationId"
+              value={form.stationId}
               onChange={handleChange}
-              placeholder="Bentork Station, Nanded City"
-              style={styles.input}
-            />
+              style={styles.select}
+              disabled={isLoadingStation}
+            >
+              <option>
+                {isLoadingStation ? 'Loading Stations...' : 'Select a Station'}
+              </option>
+              {stations.map(station => (
+                <option key={station.id} value={station.id} >
+                  {station.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div style={styles.field}>
@@ -41,7 +181,7 @@ export default function AddChargerForm({ onClose }) {   // ✅ accept onClose pr
               name="ocppId"
               value={form.ocppId}
               onChange={handleChange}
-              placeholder="12345678"
+              placeholder="e.g., CHARGER_001"
               style={styles.input}
             />
           </div>
@@ -50,14 +190,18 @@ export default function AddChargerForm({ onClose }) {   // ✅ accept onClose pr
         <div style={styles.row}>
           <div style={styles.field}>
             <label style={styles.label}>Connector Type</label>
-            <input
-              type="text"
+            <select
               name="connectorType"
               value={form.connectorType}
               onChange={handleChange}
-              placeholder="Type2"
-              style={styles.input}
-            />
+              style={styles.select}
+            >
+              <option value="" disabled>Select Connector Type</option>
+              <option value="Type-1">Type-1</option>
+              <option value="Type-2">Type-2</option>
+              <option value="Type-3">Type-3</option>
+              <option value="Type-4">Type-4</option>
+            </select>
           </div>
 
           <div style={styles.field}>
@@ -89,9 +233,9 @@ export default function AddChargerForm({ onClose }) {   // ✅ accept onClose pr
 
         <div style={styles.row}>
           <div style={{ ...styles.field, flex: 1 }}>
-            <label style={styles.label}>Rate</label>
+            <label style={styles.label}>Rate (₹ per kWh)</label>
             <div style={styles.sliderContainer}>
-              <span>₹25</span>
+              <span style={styles.sliderValue}>₹5</span>
               <input
                 type="range"
                 name="rate"
@@ -101,7 +245,7 @@ export default function AddChargerForm({ onClose }) {   // ✅ accept onClose pr
                 onChange={handleChange}
                 style={styles.slider}
               />
-              <span>₹{form.rate}</span>
+              <span style={styles.sliderValueHighlight}>₹{form.rate}</span>
             </div>
           </div>
 
@@ -122,11 +266,18 @@ export default function AddChargerForm({ onClose }) {   // ✅ accept onClose pr
         </div>
 
         <div style={styles.buttons}>
-          <button type="button" style={styles.dismiss} onClick={onClose}> {/* ✅ close form on dismiss */}
+          <button type="button" style={styles.dismiss} onClick={onClose} disabled={isSubmitting}> {/* ✅ close form on dismiss */}
             Dismiss
           </button>
-          <button type="submit" style={styles.save}>
-            Save
+          <button type="submit" 
+          style={{
+            ...styles.save,
+              opacity: isSubmitting ? 0.6 : 1,
+              cursor: isSubmitting ? 'not-allowed' : 'pointer'
+          }}
+          disabled={isSubmitting}
+          >
+            {isSubmitting ? "Adding..." : "Add Charger"}
           </button>
         </div>
       </form>
