@@ -18,7 +18,7 @@ export default function AdminLogin() {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/admin/login", {
+      const response = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -27,11 +27,19 @@ export default function AdminLogin() {
         }),
       });
 
-      const data = await response.json();
-      console.log("Login response:", data);
+      let data = {};
+      try {
+        // Attempt to parse JSON response. This may fail if the target backend is not running
+        // and Vite returns a 500 plain text proxy error instead.
+        data = await response.json();
+      } catch (jsonErr) {
+        console.warn("Could not parse JSON response (backend might be down):", jsonErr);
+      }
+
+      console.log("Login response status:", response.status, "data:", data);
 
       if (!response.ok) {
-        alert(data.message || "Invalid login credentials");
+        alert(data.message || `Server Error (${response.status}): Could not connect to backend server. Make sure it is running on port 8080.`);
         return;
       }
 
@@ -48,14 +56,15 @@ export default function AdminLogin() {
   };
 
   const handleDefaultLogin = async (e) => {
-      if(emailValue === 'admin@gmail.com' || passwordValue === 'admin') {
-        alert('Login Successfuly')
-        navigate('/dashboard')
-        return;
-      }
+    e.preventDefault();
+    if (emailValue === 'admin@gmail.com' || passwordValue === 'admin') {
+      alert('Login Successfuly')
+      navigate('/dashboard')
+      return;
+    }
 
-      navigate('/login')
-    };
+    navigate('/login')
+  };
 
   return (
     <>
@@ -180,7 +189,7 @@ export default function AdminLogin() {
         {/* LEFT SIDE */}
         <div className="left-panel">
 
-   
+
           <div className="logo-box">
             <img src={"https://raw.githubusercontent.com/bentork5151/assets/refs/heads/main/Logo/logo_inverted.png "} alt="Bentork Logo" className="logo-img" />
           </div>
@@ -198,7 +207,7 @@ export default function AdminLogin() {
           <h2 className="login-title">Login</h2>
           <p className="login-sub">Enter your registered credentials to get started!</p>
 
-          <form onSubmit={handleDefaultLogin} className="login-form">
+          <form onSubmit={handleLogin} className="login-form">
             <input
               type="text"
               placeholder="Email ID or Mobile Number"

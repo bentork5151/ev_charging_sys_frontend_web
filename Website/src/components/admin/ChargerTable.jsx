@@ -27,6 +27,7 @@ export default function ChargerTable() {
     },
   ];
 
+
   const getTypeStyle = (type) => ({
     background: type === "DC" ? "#111" : "#f4f4f5",
     color: type === "DC" ? "#fff" : "#111",

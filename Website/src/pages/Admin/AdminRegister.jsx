@@ -11,6 +11,25 @@ export default function AdminRegister() {
   const [passwordValue, setPasswordValue] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  // Simulated registration for when the backend is not running
+  const handleDefaultRegister = (e) => {
+    e.preventDefault();
+
+    if (!fullName || !emailValue || !contactNo || !passwordValue || !confirmPassword) {
+      alert("Please fill all fields.");
+      return;
+    }
+
+    if (passwordValue !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    // Since the backend is down, we spoof a successful registration
+    alert("Simulated Registration successful!");
+    navigate("/login");
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
 
@@ -25,7 +44,9 @@ export default function AdminRegister() {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/admin/signup", {
+      // Note: It's better to use "/api/admin/signup" here so Vite proxies it, 
+      // instead of hardcoding localhost:8080
+      const response = await fetch("/api/admin/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -47,7 +68,7 @@ export default function AdminRegister() {
       navigate("/login");
     } catch (err) {
       console.error(err);
-      alert("Something went wrong!");
+      alert("Connection Refused: Make sure your backend server is running on port 8080!");
     }
   };
 

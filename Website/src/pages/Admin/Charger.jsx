@@ -18,7 +18,7 @@ const LoadingSpinner = () => {
   );
 }
 
-const Model = ({children, onClose}) => {
+const Model = ({ children, onClose }) => {
   return (
     <div style={{
       position: 'fixed',
@@ -48,40 +48,34 @@ const Model = ({children, onClose}) => {
   );
 };
 
-function Charger({baseUrl}) {
+function Charger({ baseUrl }) {
   const navigate = useNavigate();
   const [chargerData, setChargerData] = useState({
-    totalData:"",
-    availableData:"",
-    acChargerData:"",
-    dcChargerData:""
+    totalData: "",
+    availableData: "",
+    acChargerData: "",
+    dcChargerData: ""
   });
   const [chargerRecoards, setChargerRecoards] = useState({});
   const [isModelOpen, setIsModelOpen] = useState(false);
-  const [loading , setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       setChargerData({
-        totalData:'...',
-        availableData:'...',
-        acChargerData:'...',
-        dcChargerData:'...'
+        totalData: '...',
+        availableData: '...',
+        acChargerData: '...',
+        dcChargerData: '...'
       });
       setChargerRecoards([]);
 
-      // const token = localStorage.getItem('token')
-      // if(!token){
-      //   console.error('Token not found, redirecting to login')
-      //   navigate('/')
-      //   return;
-      // }
-
+      const token = localStorage.getItem('token');
       const headers = {
-        'Authorization' : `Bearer ${token}`,
-        'Content-Type' : 'application/json'
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
 
       try {
@@ -95,19 +89,19 @@ function Charger({baseUrl}) {
         }
 
         const [totalRes, availableRes, acChargerRes, dcChargerRes, allRecordsRes] = await Promise.all([
-          fetch(baseUrl + endpoints.total, {headers}),
-          fetch(baseUrl + endpoints.available, {headers}),
-          fetch(baseUrl + endpoints.acCharger, {headers}),
-          fetch(baseUrl + endpoints.dcCharger, {headers}),
-          fetch(baseUrl + endpoints.allRecoards, {headers})
+          fetch(baseUrl + endpoints.total, { headers }),
+          fetch(baseUrl + endpoints.available, { headers }),
+          fetch(baseUrl + endpoints.acCharger, { headers }),
+          fetch(baseUrl + endpoints.dcCharger, { headers }),
+          fetch(baseUrl + endpoints.allRecoards, { headers })
         ]);
 
-        for(const res of [totalRes, availableRes, acChargerRes, dcChargerRes]){
-          if(res.status === 401 || res.status === 403){
+        for (const res of [totalRes, availableRes, acChargerRes, dcChargerRes]) {
+          if (res.status === 401 || res.status === 403) {
             throw new Error('Authentication Failed, Please login again')
           }
-          if(!res.ok){
-            throw new Error('Network request failed',res.statusText)
+          if (!res.ok) {
+            throw new Error('Network request failed', res.statusText)
           }
         }
 
@@ -119,26 +113,26 @@ function Charger({baseUrl}) {
           allRecordsRes.json()
         ]);
 
-        setChargerData({totalData, availableData, acChargerData, dcChargerData});
+        setChargerData({ totalData, availableData, acChargerData, dcChargerData });
         setChargerRecoards(allRecordsData);
 
       } catch (error) {
-        console.error('Failed to fetch charger data',error)
+        console.error('Failed to fetch charger data', error)
 
-        if(error.message.includes('Authentication failed')){
-          console.error('Authentication error, navigating to login',error)
+        if (error.message.includes('Authentication failed')) {
+          console.error('Authentication error, navigating to login', error)
           localStorage.removeItem('token');
           navigate('/')
           return;
         }
 
         setChargerData({
-        totalData:'Error',
-        availableData:'Error',
-        acChargerData:'Error',
-        dcChargerData:'Error'
-      });
-      setChargerRecoards([]);
+          totalData: 'Error',
+          availableData: 'Error',
+          acChargerData: 'Error',
+          dcChargerData: 'Error'
+        });
+        setChargerRecoards([]);
       } finally {
         setLoading(false);
       }
@@ -154,16 +148,10 @@ function Charger({baseUrl}) {
 
   useEffect(() => {
     const fetchData = async () => {
-      const token = localStorage.getItem('token')
-      if(!token){
-        console.error('Token not found, redirecting to login')
-        navigate('/')
-        return;
-      }
-
+      const token = localStorage.getItem('token');
       const headers = {
-        'Authorization' : `Bearer ${token}`,
-        'Content-Type' : 'application/json'
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
 
       try {
@@ -177,16 +165,16 @@ function Charger({baseUrl}) {
         }
 
         const [totalRes, availableRes, acChargerRes, dcChargerRes] = await Promise.all([
-          fetch(baseUrl + endpoints.total, {headers}),
-          fetch(baseUrl + endpoints.available, {headers}),
-          fetch(baseUrl + endpoints.acCharger, {headers}),
-          fetch(baseUrl + endpoints.dcCharger, {headers}),
-          fetch(baseUrl + endpoints.allRecoards, {headers})
+          fetch(baseUrl + endpoints.total, { headers }),
+          fetch(baseUrl + endpoints.available, { headers }),
+          fetch(baseUrl + endpoints.acCharger, { headers }),
+          fetch(baseUrl + endpoints.dcCharger, { headers }),
+          fetch(baseUrl + endpoints.allRecoards, { headers })
         ]);
 
-        for(const res of [totalRes, availableRes, acChargerRes, dcChargerRes]){
-          if(!res.ok){
-            throw new Error('Network request failed',res.statusText)
+        for (const res of [totalRes, availableRes, acChargerRes, dcChargerRes]) {
+          if (!res.ok) {
+            throw new Error('Network request failed', res.statusText)
           }
         }
 
@@ -196,13 +184,13 @@ function Charger({baseUrl}) {
         const dcChargerData = dcChargerRes.json()
         const allRecoardsData = allRecoards.json()
 
-        setChargerData({totalData, availableData, acChargerData, dcChargerData});
+        setChargerData({ totalData, availableData, acChargerData, dcChargerData });
         setChargerRecoards(allRecoardsData);
 
       } catch (error) {
-        console.error('Failed to fetch charger data',error)
-        if(error.message.includes('Authentication failed')){
-          console.error('Authentication error, navigating to login',error)
+        console.error('Failed to fetch charger data', error)
+        if (error.message.includes('Authentication failed')) {
+          console.error('Authentication error, navigating to login', error)
           navigate('/')
           return;
         }
@@ -298,11 +286,11 @@ function Charger({baseUrl}) {
           ))}
         </div>
         <br /><br />
-{/* x */}
-   <ChargerSearchBar />
+        {/* x */}
+        <ChargerSearchBar />
 
-   {/* <SessionTable records={chargerRecoards} /> */}
-   {/* Charger Records Table */}
+        {/* <SessionTable records={chargerRecoards} /> */}
+        {/* Charger Records Table */}
         <div style={{
           marginTop: "30px",
           backgroundColor: "#fff",
@@ -402,12 +390,12 @@ function Charger({baseUrl}) {
         {/* ✅ Conditionally show AddCharger form */}
         {isModelOpen && (
           <Model onClose={() => setIsModelOpen(false)}>
-            <Suspense fallback={<LoadingSpinner/>}>
-            <AddCharger 
-            onClose={() => setIsFormOpen(false)} 
-            onChargerAdded={handleChargerAdded}
-            baseUrl={baseUrl}
-            />
+            <Suspense fallback={<LoadingSpinner />}>
+              <AddCharger
+                onClose={() => setIsFormOpen(false)}
+                onChargerAdded={handleChargerAdded}
+                baseUrl={baseUrl}
+              />
             </Suspense>
           </Model>
         )}
